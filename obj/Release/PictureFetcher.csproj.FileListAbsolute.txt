@@ -1,9 +1,0 @@
-C:\Users\yize\source\repos\PictureReader\bin\Release\PictureReader.exe.config
-C:\Users\yize\source\repos\PictureReader\bin\Release\PictureReader.exe
-C:\Users\yize\source\repos\PictureReader\bin\Release\PictureReader.pdb
-C:\Users\yize\source\repos\PictureReader\obj\Release\PictureReader.MainForm.resources
-C:\Users\yize\source\repos\PictureReader\obj\Release\PictureReader.Properties.Resources.resources
-C:\Users\yize\source\repos\PictureReader\obj\Release\PictureFetcher.csproj.GenerateResource.cache
-C:\Users\yize\source\repos\PictureReader\obj\Release\PictureFetcher.csproj.CoreCompileInputs.cache
-C:\Users\yize\source\repos\PictureReader\obj\Release\PictureReader.exe
-C:\Users\yize\source\repos\PictureReader\obj\Release\PictureReader.pdb

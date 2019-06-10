@@ -45,6 +45,7 @@
             this.btn_single_convert = new System.Windows.Forms.Button();
             this.track_bar_ocap = new System.Windows.Forms.TrackBar();
             this.label1 = new System.Windows.Forms.Label();
+            this.ll_open_source_address = new System.Windows.Forms.LinkLabel();
             ((System.ComponentModel.ISupportInitialize)(this.pb_src)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pb_to)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nud_yuzhi)).BeginInit();
@@ -172,12 +173,21 @@
             resources.ApplyResources(this.label1, "label1");
             this.label1.Name = "label1";
             // 
+            // ll_open_source_address
+            // 
+            resources.ApplyResources(this.ll_open_source_address, "ll_open_source_address");
+            this.ll_open_source_address.LinkColor = System.Drawing.Color.Red;
+            this.ll_open_source_address.Name = "ll_open_source_address";
+            this.ll_open_source_address.TabStop = true;
+            this.ll_open_source_address.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.Ll_open_source_address_Clicked);
+            // 
             // MainForm
             // 
             this.AllowDrop = true;
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(192)))));
+            this.Controls.Add(this.ll_open_source_address);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.track_bar_ocap);
             this.Controls.Add(this.btn_single_convert);
@@ -228,6 +238,7 @@
         private System.Windows.Forms.Button btn_single_convert;
         private System.Windows.Forms.TrackBar track_bar_ocap;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.LinkLabel ll_open_source_address;
     }
 }
 

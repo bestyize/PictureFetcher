@@ -269,6 +269,9 @@ namespace PictureReader
             MainForm.ActiveForm.Opacity=track_bar_ocap.Value/100.0;
         }
 
-
+        private void Ll_open_source_address_Clicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            System.Diagnostics.Process.Start("https://github.com/bestyize/PictureFetcher");
+        }
     }
 }
