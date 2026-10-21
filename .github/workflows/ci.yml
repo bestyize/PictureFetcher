@@ -65,6 +65,25 @@ jobs:
         shell: bash
         run: |
           test -s "publish/${{ matrix.rid }}/${{ matrix.executable }}"
+      - name: Verify macOS .app signing and DMG packaging
+        if: startsWith(matrix.rid, 'osx-')
+        shell: bash
+        run: bash packaging/macos/package.sh "${{ matrix.rid }}" "ci-${{ github.run_number }}" "publish/${{ matrix.rid }}"
+      - name: Verify Linux tarball packaging
+        if: matrix.rid == 'linux-x64'
+        shell: bash
+        run: bash packaging/linux/package.sh "ci-${{ github.run_number }}" publish/linux-x64
+      - name: Verify Windows ZIP packaging
+        if: matrix.rid == 'win-x64'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path release-assets -Force | Out-Null
+          Compress-Archive -Path publish/win-x64/* -DestinationPath release-assets/PictureFetcher-ci-win-x64.zip
+      - name: Measure packaged distribution size
+        shell: bash
+        run: |
+          ls -lh release-assets/
+          test -n "$(find release-assets -type f -size +1M -print -quit)"
       - name: Record uncompressed payload size
         shell: bash
         run: |
