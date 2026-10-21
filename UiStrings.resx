@@ -23,4 +23,16 @@
   <data name="SaveCompleted" xml:space="preserve"><value>BMP file saved successfully.</value></data>
   <data name="SelectImageFirst" xml:space="preserve"><value>Select an image first.</value></data>
   <data name="Information" xml:space="preserve"><value>Information</value></data>
+  <data name="BrandCaption" xml:space="preserve"><value>OLED image studio</value></data>
+  <data name="Workspace" xml:space="preserve"><value>Image workspace</value></data>
+  <data name="WorkspaceDescription" xml:space="preserve"><value>Convert images into 128 × 64 OLED-ready pixels.</value></data>
+  <data name="CopyData" xml:space="preserve"><value>Copy bitmap data</value></data>
+  <data name="Settings" xml:space="preserve"><value>WORKSPACE</value></data>
+  <data name="DropImage" xml:space="preserve"><value>Open or drop an image here</value></data>
+  <data name="ArrayDescription" xml:space="preserve"><value>1024 bytes · SSD1306 page order</value></data>
+  <data name="OutputPlaceholder" xml:space="preserve"><value>Open an image to generate bitmap bytes</value></data>
+  <data name="InvalidImage" xml:space="preserve"><value>The selected file is not a supported image.</value></data>
+  <data name="ImageTooLarge" xml:space="preserve"><value>The image exceeds the 80 megapixel safety limit.</value></data>
+  <data name="BatchCompletedCount" xml:space="preserve"><value>Saved {0} OLED BMP image(s).</value></data>
+  <data name="Error" xml:space="preserve"><value>Error</value></data>
 </root>
