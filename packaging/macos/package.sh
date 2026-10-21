@@ -13,6 +13,19 @@ bundle="$work_dir/PictureFetcher.app"
 mkdir -p "$bundle/Contents/MacOS"
 cp -R "$publish_dir/." "$bundle/Contents/MacOS/"
 cp packaging/macos/Info.plist "$bundle/Contents/Info.plist"
+mkdir -p "$bundle/Contents/Resources"
+icon_source="$work_dir/picturefetcher-1024.png"
+iconset="$work_dir/PictureFetcher.iconset"
+mkdir -p "$iconset"
+python3 packaging/macos/generate_icon.py "$icon_source"
+for size in 16 32 128 256 512; do
+  sips -s format png -z "$size" "$size" "$icon_source" \
+    --out "$iconset/icon_${size}x${size}.png" >/dev/null
+  double_size="$((size * 2))"
+  sips -s format png -z "$double_size" "$double_size" "$icon_source" \
+    --out "$iconset/icon_${size}x${size}@2x.png" >/dev/null
+done
+iconutil -c icns "$iconset" -o "$bundle/Contents/Resources/PictureFetcher.icns"
 chmod +x "$bundle/Contents/MacOS/PictureFetcher"
 plutil -lint "$bundle/Contents/Info.plist"
 

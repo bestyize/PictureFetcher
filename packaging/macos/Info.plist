@@ -6,6 +6,7 @@
   <key>CFBundleExecutable</key><string>PictureFetcher</string>
   <key>CFBundleIdentifier</key><string>io.github.bestyize.picturefetcher</string>
   <key>CFBundleInfoDictionaryVersion</key><string>6.0</string>
+  <key>CFBundleIconFile</key><string>PictureFetcher</string>
   <key>CFBundleName</key><string>PictureFetcher</string>
   <key>CFBundleDisplayName</key><string>PictureFetcher</string>
   <key>CFBundlePackageType</key><string>APPL</string>
