@@ -23,8 +23,6 @@
     <Compile Include="App.axaml.cs" />
     <Compile Include="UiStrings.cs" />
     <Compile Include="Views/MainWindow.axaml.cs" />
-    <AvaloniaResource Include="App.axaml" />
-    <AvaloniaResource Include="Views/MainWindow.axaml" />
     <EmbeddedResource Include="UiStrings.resx" />
     <EmbeddedResource Include="UiStrings.zh-CN.resx" />
   </ItemGroup>
