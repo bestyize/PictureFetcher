@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,9 +15,62 @@ namespace PictureReader
     public partial class MainForm : Form
     {
         private string src_pic_name;
+        private readonly Label languageLabel;
+        private readonly ComboBox languageSelector;
+
         public MainForm()
         {
             InitializeComponent();
+
+            languageLabel = new Label
+            {
+                AutoSize = true,
+                Location = new Point(474, 12),
+                Name = "languageLabel"
+            };
+            languageSelector = new ComboBox
+            {
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                Location = new Point(536, 8),
+                Name = "languageSelector",
+                Size = new Size(131, 24),
+                TabIndex = 22
+            };
+            languageSelector.Items.AddRange(new object[] { "English", "简体中文" });
+            languageSelector.SelectedIndex = UiStrings.Culture.Name == "zh-CN" ? 1 : 0;
+            languageSelector.SelectedIndexChanged += LanguageSelector_SelectedIndexChanged;
+            Controls.Add(languageLabel);
+            Controls.Add(languageSelector);
+            ApplyLanguage();
+        }
+
+        private void LanguageSelector_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            UiStrings.SetCulture(languageSelector.SelectedIndex == 1 ? "zh-CN" : "en-US");
+            ApplyLanguage();
+        }
+
+        private void ApplyLanguage()
+        {
+            Text = UiStrings.Get("WindowTitle");
+            languageLabel.Text = UiStrings.Get("Language");
+            btn_mult_convert.Text = UiStrings.Get("BatchConvert");
+            btn_mult_convert.Width = 110;
+            btn_single_convert.Text = UiStrings.Get("SingleConvert");
+            btn_single_convert.Width = 110;
+            btn_save.Text = UiStrings.Get("SaveFile");
+            btn_save.Width = 85;
+            label_src_pic_name.Text = string.IsNullOrEmpty(src_pic_name)
+                ? UiStrings.Get("OriginalImage")
+                : Path.GetFileName(src_pic_name);
+            label2.Text = UiStrings.Get("ResizedImage");
+            label3.Text = UiStrings.Get("ImageArray");
+            tb_yuzhi.Text = UiStrings.Get("Threshold");
+            cb_ascii.Text = UiStrings.Get("AsciiMode");
+            cb_text.Text = UiStrings.Get("FontArrayMode");
+            cb_reverse.Text = UiStrings.Get("Invert");
+            label1.Text = UiStrings.Get("Opacity");
+            ll_open_source_address.Text = UiStrings.Get("SourceCode");
         }
 
         
@@ -24,6 +79,8 @@ namespace PictureReader
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Multiselect = true;
+            openFileDialog.Title = UiStrings.Get("BatchConvert");
+            openFileDialog.Filter = UiStrings.Get("ImageFilter");
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 
@@ -37,7 +94,7 @@ namespace PictureReader
                     src_pic_name = filenames[i];
                     newPic.Save(src_pic_name.Substring(0, src_pic_name.LastIndexOf(".")) + ".bmp", System.Drawing.Imaging.ImageFormat.Bmp);
                 }
-                MessageBox.Show("转换完成,已保存到同级目录下");
+                MessageBox.Show(UiStrings.Get("BatchCompleted"), UiStrings.Get("Information"));
 
             }
         }
@@ -45,12 +102,14 @@ namespace PictureReader
         private void Btn_single_convert_Click(object sender, EventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Title = UiStrings.Get("SingleConvert");
+            openFileDialog.Filter = UiStrings.Get("ImageFilter");
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 var filename = openFileDialog.FileName;
 
                 src_pic_name = filename;
-                label_src_pic_name.Text = filename.Substring(filename.LastIndexOf("\\")+1);
+                label_src_pic_name.Text = Path.GetFileName(filename);
                 pb_src.Image = Image.FromFile(filename);
                 convert();
 
@@ -119,7 +178,7 @@ namespace PictureReader
         {
             Bitmap newPic = new Bitmap(pb_to.Image);
             newPic.Save(src_pic_name.Substring(0,src_pic_name.LastIndexOf("."))+".bmp", System.Drawing.Imaging.ImageFormat.Bmp);
-            MessageBox.Show("保存成功！");
+            MessageBox.Show(UiStrings.Get("SaveCompleted"), UiStrings.Get("Information"));
         }
 
         private void convertToArray(Bitmap bitmap,int mode)
@@ -241,7 +300,7 @@ namespace PictureReader
             }
             if (pb_src.Image == null)
             {
-                MessageBox.Show("请先选择图像","温馨提示");
+                MessageBox.Show(UiStrings.Get("SelectImageFirst"), UiStrings.Get("Information"));
                 return;
             }
             convert();
@@ -256,7 +315,7 @@ namespace PictureReader
         {
             if (pb_src.Image == null)
             {
-                MessageBox.Show("请先选择图像", "温馨提示");
+                MessageBox.Show(UiStrings.Get("SelectImageFirst"), UiStrings.Get("Information"));
                 return;
             }
             Bitmap bitmap = new Bitmap(pb_src.Image);
@@ -266,12 +325,12 @@ namespace PictureReader
 
         private void Track_bar_ocap_ValueChanged(object sender, EventArgs e)
         {
-            MainForm.ActiveForm.Opacity=track_bar_ocap.Value/100.0;
+            Opacity = track_bar_ocap.Value / 100.0;
         }
 
         private void Ll_open_source_address_Clicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            System.Diagnostics.Process.Start("https://github.com/bestyize/PictureFetcher");
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("https://github.com/bestyize/PictureFetcher") { UseShellExecute = true });
         }
     }
 }
