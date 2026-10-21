@@ -15,7 +15,7 @@
   <ItemGroup>
     <PackageReference Include="Avalonia.Desktop" Version="11.3.20" />
     <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.20" />
-    <PackageReference Include="SkiaSharp" Version="3.119.4" />
+    <PackageReference Include="SkiaSharp" Version="2.88.9" />
     <ProjectReference Include="src/PictureFetcher.Core/PictureFetcher.Core.csproj" />
   </ItemGroup>
   <ItemGroup>
