@@ -271,7 +271,7 @@ namespace PictureReader
 
         private void Ll_open_source_address_Clicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            System.Diagnostics.Process.Start("https://github.com/bestyize/PictureFetcher");
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("https://github.com/bestyize/PictureFetcher") { UseShellExecute = true });
         }
     }
 }
