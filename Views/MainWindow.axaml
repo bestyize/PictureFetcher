@@ -46,7 +46,7 @@
           <Grid RowDefinitions="Auto,*" RowSpacing="12">
             <TextBlock x:Name="OriginalHeading" Classes="eyebrow" Text="SOURCE"/>
             <Grid Grid.Row="1">
-              <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="7">
+              <StackPanel x:Name="EmptyState" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="7">
                 <Border CornerRadius="26" Background="#F2F5FB" Width="52" Height="52">
                   <TextBlock Text="＋" FontSize="26" Foreground="#7B91BC" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Border>
