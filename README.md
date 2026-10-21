@@ -1,66 +1,67 @@
 # PictureFetcher
 
-[简体中文](README.zh-CN.md) | English
+**English** · [简体中文](README.zh-CN.md)
 
-PictureFetcher is a lightweight Windows desktop utility for preparing images for **128 × 64 monochrome OLED displays**. It can resize and binarize images, batch-convert them to BMP files, and generate hexadecimal or C-array-style bitmap data for embedded projects.
+A compact cross-platform image-to-bitmap desktop tool for **128 × 64 monochrome OLED displays**. Powered by .NET 10 and Avalonia.
+
+## Downloads
+
+Get your platform's archive from [GitHub Releases](https://github.com/bestyize/PictureFetcher/releases).
+
+| Platform | Package | Installation |
+| --- | --- | --- |
+| Windows (Intel / AMD 64-bit) | `PictureFetcher-vX.Y.Z-win-x64.zip` | Extract, then run `PictureFetcher.exe` |
+| Linux x64 | `PictureFetcher-vX.Y.Z-linux-x64.tar.gz` | Extract and run `./PictureFetcher` |
+| Mac with Apple Silicon | `PictureFetcher-vX.Y.Z-osx-arm64.dmg` | Open DMG, drag PictureFetcher into Applications |
+| Mac with Intel | `PictureFetcher-vX.Y.Z-osx-x64.dmg` | Open DMG, drag PictureFetcher into Applications |
+
+The binaries are self-contained, so you do **not** need to install the .NET 10 runtime. The Linux build requires standard system desktop/X11 or Wayland and font libraries (a graphical environment is necessary).
+
+**macOS security note:** Current public builds use *ad-hoc* code signing, not Apple Developer ID signing or notarization. They are **not trusted by Gatekeeper** when downloaded from the internet. For frictionless installation, the release must be signed with an Apple Developer ID and notarized. See [Packaging notes](docs/PACKAGING.md). Do not misinterpret the ad-hoc signature as Apple verification.
 
 ## Features
 
-- Convert images into 128 × 64 monochrome previews with an adjustable threshold.
-- Invert pixel colors and switch between hexadecimal and C array output modes.
-- Open a single image, or batch-convert multiple images to BMP files alongside their originals.
-- Adjust window opacity.
-- Switch the interface between **English** and **Simplified Chinese**. The app initially follows the Windows UI language (Chinese or English fallback) and remembers your manual selection.
+- Native-feeling macOS-inspired desktop layout on Windows, Linux and macOS.
+- English / 简体中文 UI, with remembered language preference.
+- Open or drag an image into the editor; preview original and 128 × 64 output.
+- Adjustable threshold and invert control.
+- SSD1306 page-format output: hexadecimal byte stream or 1024-byte C array, with copy action.
+- Save individual BMP images or batch-convert multiple images.
 
-## Download
+**Conversion compatibility:** The original app's threshold polarity is preserved: a pixel with R+G+B above the threshold is rendered black (unless Invert is enabled). This can differ from other image tools. The OLED byte encoding is vertical LSB-first, in eight pages of 128 bytes.
 
-Go to [GitHub Releases](https://github.com/bestyize/PictureFetcher/releases) to download a Windows build. Release archives include self-contained executables: the .NET desktop runtime does **not** need to be installed separately.
+**Safe batch exports:** Converted files are saved beside their sources with the suffix `-oled.bmp`. If the name exists, numbered suffixes are used instead of overwriting any source or previous export.
 
-- `win-x64`: most Intel/AMD Windows 10/11 PCs.
-- `win-arm64`: ARM-based Windows PCs.
+## Build
 
-Extract the ZIP and launch `PictureReader.exe`. There is no installer and the build is not code-signed; Windows SmartScreen may ask you to confirm the publisher.
-
-**Platform support:** Windows only. The UI uses Windows Forms; targeting .NET 10 does not make the application compatible with macOS or Linux.
-
-## Usage
-
-1. Choose **Open image** to load a single image, or **Batch convert** to select multiple images.
-2. Adjust the threshold or enable **Invert** to change the black/white conversion.
-3. Choose **Hex mode** or **C array** to view the generated bitmap data.
-4. Select **Save BMP** to export the current image; batch conversion exports BMP files automatically.
-5. Use the **Language** selector in the upper-right corner to change UI language.
-
-**Note:** BMP files are saved with the same base names as their source images in the same directories. Back up any existing BMPs with those names before converting.
-
-## Build from source
-
-Requires the **.NET 10 SDK** and a Windows environment (or a Windows-capable build agent).
-
-```powershell
-dotnet restore PictureFetcher.csproj
-dotnet build PictureFetcher.csproj --configuration Release
-dotnet run --project PictureFetcher.csproj
-```
-
-For a self-contained, single-file Windows x64 executable:
-
-```powershell
-dotnet publish PictureFetcher.csproj --configuration Release --runtime win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:DebugType=None --output publish/win-x64
-```
-
-## Automation
-
-- **CI** builds the application on Windows for pushes and pull requests.
-- **Release** packages Windows x64 and ARM64 builds when a `v*` tag is pushed; it uploads the ZIPs as GitHub Release assets. Manual runs produce downloadable workflow artifacts without publishing a release.
-
-To publish a version after merging a PR:
+Install the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0).
 
 ```bash
-git tag v1.0.0
-git push origin v1.0.0
+dotnet restore PictureFetcher.sln
+dotnet build PictureFetcher.sln -c Release
+dotnet run --project PictureFetcher.csproj
+dotnet run --project tests/PictureFetcher.Core.Tests/PictureFetcher.Core.Tests.csproj
 ```
+
+To build a self-contained release for a selected architecture:
+
+```bash
+dotnet publish PictureFetcher.csproj -c Release -r linux-x64 --self-contained true \
+  -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true \
+  -p:EnableCompressionInSingleFile=true -p:PublishReadyToRun=false \
+  -p:PublishTrimmed=false -p:DebugType=None -p:DebugSymbols=false
+```
+
+Replace `linux-x64` with `win-x64`, `osx-arm64`, or `osx-x64` as needed. For distribution, use the matching GitHub-hosted runner and packaging script.
+
+## Release automation
+
+CI validates the portable conversion core and generates all four self-contained runtime targets; it also smoke-tests the platform-specific package formats. Push a version tag `vX.Y.Z` after merging to publish the four archives and `SHA256SUMS.txt` to GitHub Releases. You can invoke the release workflow manually to generate reviewable artifacts without publishing a public release.
+
+Optimizations are deliberately conservative: single-file bundling with compression, no PDB files or ReadyToRun payload, and no duplicated multi-RID runtime archives. IL trimming is **not** enabled because Avalonia's XAML and reflection-based code need runtime verification before aggressive trimming; smaller file size must not come at the cost of a broken app.
+
+For platform packaging details and signing requirements, see [PACKAGING.md](docs/PACKAGING.md).
 
 ## License
 
-Licensed under the [MIT License](LICENSE). Copyright © 2019–2026 bestyize.
+[MIT](LICENSE) · Copyright © 2019–2026 bestyize.
