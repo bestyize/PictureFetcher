@@ -14,56 +14,58 @@ permissions:
   contents: read
 
 jobs:
-  build:
-    name: Build .NET 10 Windows Forms
-    runs-on: windows-latest
+  core-tests:
+    name: OLED conversion regression tests
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up .NET 10
-        uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
+      - name: Run portable conversion tests
+        run: dotnet run --project tests/PictureFetcher.Core.Tests/PictureFetcher.Core.Tests.csproj --configuration Release
 
-      - name: Restore
-        run: dotnet restore PictureFetcher.csproj
-
-      - name: Build (Release)
-        run: dotnet build PictureFetcher.csproj --configuration Release --no-restore
-
-  package-smoke:
-    name: Verify published ${{ matrix.rid }} executable
-    runs-on: windows-latest
+  desktop:
+    name: Publish ${{ matrix.rid }}
     strategy:
       fail-fast: false
       matrix:
-        rid: [win-x64, win-arm64]
+        include:
+          - rid: win-x64
+            os: windows-latest
+            executable: PictureFetcher.exe
+          - rid: linux-x64
+            os: ubuntu-latest
+            executable: PictureFetcher
+          - rid: osx-arm64
+            os: macos-15
+            executable: PictureFetcher
+          - rid: osx-x64
+            os: macos-15
+            executable: PictureFetcher
+    runs-on: ${{ matrix.os }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up .NET 10
-        uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
-
-      - name: Publish self-contained single-file build
-        shell: pwsh
+      - name: Publish self-contained single-file desktop app
+        shell: bash
         run: |
-          dotnet publish PictureFetcher.csproj `
-            --configuration Release `
-            --runtime ${{ matrix.rid }} `
-            --self-contained true `
-            -p:PublishSingleFile=true `
-            -p:IncludeNativeLibrariesForSelfExtract=true `
-            -p:DebugType=None `
-            -p:DebugSymbols=false `
-            --output publish/${{ matrix.rid }}
-
-      - name: Check published executable
-        shell: pwsh
+          dotnet publish PictureFetcher.csproj \
+            -c Release -r ${{ matrix.rid }} --self-contained true \
+            -p:PublishSingleFile=true \
+            -p:IncludeNativeLibrariesForSelfExtract=true \
+            -p:EnableCompressionInSingleFile=true \
+            -p:PublishReadyToRun=false \
+            -p:PublishTrimmed=false \
+            -p:DebugType=None -p:DebugSymbols=false \
+            -o publish/${{ matrix.rid }}
+      - name: Check bundle payload
+        shell: bash
         run: |
-          if (-not (Test-Path "publish/${{ matrix.rid }}/PictureReader.exe")) {
-            throw "Missing PictureReader.exe in ${{ matrix.rid }} package"
-          }
+          test -s "publish/${{ matrix.rid }}/${{ matrix.executable }}"
+      - name: Record uncompressed payload size
+        shell: bash
+        run: |
+          du -sh "publish/${{ matrix.rid }}" || true
