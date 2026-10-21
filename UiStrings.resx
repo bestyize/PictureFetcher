@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="WindowTitle" xml:space="preserve"><value>PictureFetcher — OLED 128×64 image converter</value></data>
+  <data name="Language" xml:space="preserve"><value>Language</value></data>
+  <data name="BatchConvert" xml:space="preserve"><value>Batch convert</value></data>
+  <data name="SingleConvert" xml:space="preserve"><value>Open image</value></data>
+  <data name="SaveFile" xml:space="preserve"><value>Save BMP</value></data>
+  <data name="OriginalImage" xml:space="preserve"><value>Original image</value></data>
+  <data name="ResizedImage" xml:space="preserve"><value>128×64 preview</value></data>
+  <data name="ImageArray" xml:space="preserve"><value>Bitmap array</value></data>
+  <data name="Threshold" xml:space="preserve"><value>Threshold</value></data>
+  <data name="AsciiMode" xml:space="preserve"><value>Hex mode</value></data>
+  <data name="FontArrayMode" xml:space="preserve"><value>C array</value></data>
+  <data name="Invert" xml:space="preserve"><value>Invert</value></data>
+  <data name="Opacity" xml:space="preserve"><value>Opacity</value></data>
+  <data name="SourceCode" xml:space="preserve"><value>Source code</value></data>
+  <data name="ImageFilter" xml:space="preserve"><value>Image files|*.png;*.jpg;*.jpeg;*.bmp;*.gif;*.tif;*.tiff|All files|*.*</value></data>
+  <data name="BatchCompleted" xml:space="preserve"><value>Conversion complete. BMP files were saved next to the source images.</value></data>
+  <data name="SaveCompleted" xml:space="preserve"><value>BMP file saved successfully.</value></data>
+  <data name="SelectImageFirst" xml:space="preserve"><value>Select an image first.</value></data>
+  <data name="Information" xml:space="preserve"><value>Information</value></data>
+</root>
