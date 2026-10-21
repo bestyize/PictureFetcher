@@ -39,7 +39,7 @@ if [[ -n "${MACOS_CERTIFICATE_BASE64:-}" ]]; then
   security create-keychain -p "$keychain_password" "$keychain"
   security set-keychain-settings -lut 21600 "$keychain"
   security unlock-keychain -p "$keychain_password" "$keychain"
-  echo "$MACOS_CERTIFICATE_BASE64" | base64 --decode > "$work_dir/developer-id.p12"
+  echo "$MACOS_CERTIFICATE_BASE64" | base64 -D > "$work_dir/developer-id.p12"
   security import "$work_dir/developer-id.p12" -k "$keychain" \
     -P "$MACOS_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
   security set-key-partition-list -S apple-tool:,apple: -s \
