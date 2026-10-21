@@ -31,7 +31,20 @@ For a seamless end-user install, the repository owner must:
 3. Submit each DMG to Apple's notary service and staple the notarization ticket.
 4. Distribute only the signed and notarized DMG.
 
-The repository **does not contain** private signing identities and should never commit them. The current workflow does not claim notarization or offer a way to bypass Apple's security protections.
+The repository **does not contain** private signing identities and should never commit them. To enable signed, notarized GitHub Releases, configure these **GitHub Actions repository secrets**:
+
+| Secret | Description |
+| --- | --- |
+| `MACOS_CERTIFICATE_BASE64` | Base64-encoded export of your Developer ID Application `.p12` certificate |
+| `MACOS_CERTIFICATE_PASSWORD` | Password for the P12 export |
+| `MACOS_SIGNING_IDENTITY` | Exact identity name, e.g. `Developer ID Application: Example (TEAMID)` |
+| `APPLE_NOTARY_ID` | Apple ID used for notarization |
+| `APPLE_NOTARY_PASSWORD` | Apple app-specific password |
+| `APPLE_NOTARY_TEAM_ID` | Apple Developer team identifier |
+
+With a certificate, macOS package jobs import the signing identity into a temporary keychain and sign the app with Hardened Runtime and the JIT entitlement. With notarization credentials, the DMG is submitted to Apple's notary service and the accepted ticket is stapled. CI uses ad-hoc signing without secrets, so forks can verify packaging without storing or exposing sensitive credentials.
+
+**Important:** Notarization is required for trusted public distribution and is not guaranteed until those secrets are configured and a tagged release succeeds. Never distribute the signing certificate or password in your repository.
 
 ## Linux dependencies
 
