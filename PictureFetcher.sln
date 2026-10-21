@@ -1,25 +1,33 @@
-﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.28803.452
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36309.9
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PictureFetcher", "PictureFetcher.csproj", "{3DEA9B60-F834-49D6-AE8E-14E1896CA23C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PictureFetcher", "PictureFetcher.csproj", "{3DEA9B60-F834-49D6-AE8E-14E1896CA23C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PictureFetcher.Core", "src\PictureFetcher.Core\PictureFetcher.Core.csproj", "{823E5F38-DF29-44A7-B05F-C861C4AD9768}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PictureFetcher.Core.Tests", "tests\PictureFetcher.Core.Tests\PictureFetcher.Core.Tests.csproj", "{DA5E41D7-B1BF-4D7F-96B0-19D2EA8B5171}"
 EndProject
 Global
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{3DEA9B60-F834-49D6-AE8E-14E1896CA23C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3DEA9B60-F834-49D6-AE8E-14E1896CA23C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3DEA9B60-F834-49D6-AE8E-14E1896CA23C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3DEA9B60-F834-49D6-AE8E-14E1896CA23C}.Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {CF3D0A4C-3F23-4297-9A3E-D5375E42F02C}
-	EndGlobalSection
+  GlobalSection(SolutionConfigurationPlatforms) = preSolution
+    Debug|Any CPU = Debug|Any CPU
+    Release|Any CPU = Release|Any CPU
+  EndGlobalSection
+  GlobalSection(ProjectConfigurationPlatforms) = postSolution
+    {3DEA9B60-F834-49D6-AE8E-14E1896CA23C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+    {3DEA9B60-F834-49D6-AE8E-14E1896CA23C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+    {3DEA9B60-F834-49D6-AE8E-14E1896CA23C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+    {3DEA9B60-F834-49D6-AE8E-14E1896CA23C}.Release|Any CPU.Build.0 = Release|Any CPU
+    {823E5F38-DF29-44A7-B05F-C861C4AD9768}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+    {823E5F38-DF29-44A7-B05F-C861C4AD9768}.Debug|Any CPU.Build.0 = Debug|Any CPU
+    {823E5F38-DF29-44A7-B05F-C861C4AD9768}.Release|Any CPU.ActiveCfg = Release|Any CPU
+    {823E5F38-DF29-44A7-B05F-C861C4AD9768}.Release|Any CPU.Build.0 = Release|Any CPU
+    {DA5E41D7-B1BF-4D7F-96B0-19D2EA8B5171}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+    {DA5E41D7-B1BF-4D7F-96B0-19D2EA8B5171}.Debug|Any CPU.Build.0 = Debug|Any CPU
+    {DA5E41D7-B1BF-4D7F-96B0-19D2EA8B5171}.Release|Any CPU.ActiveCfg = Release|Any CPU
+    {DA5E41D7-B1BF-4D7F-96B0-19D2EA8B5171}.Release|Any CPU.Build.0 = Release|Any CPU
+  EndGlobalSection
+  GlobalSection(SolutionProperties) = preSolution
+    HideSolutionNode = FALSE
+  EndGlobalSection
 EndGlobal

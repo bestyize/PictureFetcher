@@ -44,6 +44,20 @@ public partial class MainWindow : Window
         AddHandler(DragDrop.DragOverEvent, OnDragOver);
         AddHandler(DragDrop.DropEvent, OnDrop);
         ApplyLanguage();
+        SizeChanged += (_, _) => AdaptLayout();
+        AdaptLayout();
+    }
+
+    private void AdaptLayout()
+    {
+        // Keep tool controls and preview cards usable on smaller laptop windows.
+        bool compact = Bounds.Width < 940;
+        LayoutRoot.ColumnDefinitions[0].Width = new GridLength(compact ? 180 : 232);
+        BrandCaption.IsVisible = !compact;
+        BrandTitle.FontSize = compact ? 14 : 18;
+        PageCaption.IsVisible = !compact;
+        OriginalCard.Padding = compact ? new Thickness(12) : new Thickness(18);
+        OutputCard.Padding = compact ? new Thickness(12) : new Thickness(18);
     }
 
     private void ApplyLanguage()
@@ -113,7 +127,7 @@ public partial class MainWindow : Window
             SourcePreview.Source = nextSource;
             _sourceBitmap?.Dispose();
             _sourceBitmap = nextSource;
-            EmptyHint.IsVisible = false;
+            EmptyState.IsVisible = false;
             Rebuild();
         }
         catch (Exception error) when (error is IOException or UnauthorizedAccessException
@@ -172,7 +186,7 @@ public partial class MainWindow : Window
             });
             if (file is null) return;
             await using var output = await file.OpenWriteAsync();
-            output.SetLength(0);
+            if (output.CanSeek) output.SetLength(0);
             await output.WriteAsync(_frame.ToBmp());
         }
         catch (Exception error) when (error is IOException or UnauthorizedAccessException)

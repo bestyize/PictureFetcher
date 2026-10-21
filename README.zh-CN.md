@@ -1,66 +1,64 @@
 # PictureFetcher
 
-[English](README.md) | 简体中文
+[English](README.md) · **简体中文**
 
-PictureFetcher 是一款用于 **128 × 64 单色 OLED 屏幕**的轻量级 Windows 图像取模工具，支持图像缩放、黑白二值化、批量 BMP 转换，以及生成单片机项目可用的十六进制或 C 数组格式字模数据。
-
-## 功能
-
-- 将图像转换为 128 × 64 的单色图像，并提供可调节阈值。
-- 支持颜色取反、十六进制模式和 C 数组模式。
-- 单张图片导入、批量转换和导出 BMP 文件。
-- 支持调整窗口透明度。
-- 支持**简体中文 / English** 界面切换，首次运行按照系统 UI 语言选择（非中文系统默认英文），手动选择后自动记忆。
+PictureFetcher 是专为 **128 × 64 单色 OLED 屏幕**开发的跨平台图像取模工具，采用 .NET 10 + Avalonia，界面采用简洁的 Mac 风格。
 
 ## 下载安装
 
-前往 [GitHub Releases](https://github.com/bestyize/PictureFetcher/releases) 下载 Windows 发布包。发布包包含自带运行时的可执行文件，**无需另行安装 .NET 桌面运行时**。
+请在 [GitHub Releases](https://github.com/bestyize/PictureFetcher/releases) 下载对应平台的安装包。
 
-- `win-x64`：适用于大部分 Intel/AMD Windows 10/11 设备。
-- `win-arm64`：适用于 ARM 架构 Windows 设备。
+| 系统 | 发布包 | 使用方式 |
+| --- | --- | --- |
+| Windows x64 | `PictureFetcher-vX.Y.Z-win-x64.zip` | 解压后运行 `PictureFetcher.exe` |
+| Linux x64 | `PictureFetcher-vX.Y.Z-linux-x64.tar.gz` | 解压后运行 `./PictureFetcher` |
+| macOS Apple Silicon | `PictureFetcher-vX.Y.Z-osx-arm64.dmg` | 打开 DMG，将 PictureFetcher 拖入应用程序文件夹 |
+| macOS Intel | `PictureFetcher-vX.Y.Z-osx-x64.dmg` | 打开 DMG，将 PictureFetcher 拖入应用程序文件夹 |
 
-解压 ZIP 后直接运行 `PictureReader.exe`。当前提供免安装版本，尚未进行代码签名，首次启动可能出现 Windows SmartScreen 提示。
+四平台采用自包含发布，**无需另装 .NET 10 运行时**。Linux 需要桌面图形环境及常见 X11/Wayland、字体等系统依赖。
 
-**平台说明：**本软件采用 Windows Forms，仅支持 Windows。升级到 .NET 10 并不意味着支持 macOS 或 Linux。
+**macOS 签名提醒：**当前公开构建为 *ad-hoc（临时）签名*，**不等于 Apple Developer ID 签名或苹果公证**，从网络下载后可能被 Gatekeeper 拦截。要做到普通用户双击即可顺利安装，需要开发者证书和公证。详见[打包说明](docs/PACKAGING.md)。
 
-## 使用方法
+## 功能
 
-1. 点击**单个转换**选择图片，或者使用**批量转换**选择多张图片。
-2. 根据预览调整**阈值**，必要时勾选**取反**。
-3. 使用**十六进制模式**或**字模模式**查看生成的数据。
-4. 点击**保存 BMP**导出当前图片；批量转换将自动导出。
-5. 在窗口右上角通过**语言**选择框切换中文和英文。
+- Mac 风格跨平台桌面 UI，支持中英文切换并记忆选择。
+- 打开或拖入图片，同时显示原图和 128 × 64 转换预览。
+- 阈值调整、黑白取反。
+- SSD1306 页序 1024 字节数据，支持十六进制文本、C 数组和一键复制。
+- 单张导出 BMP、批量转换。
 
-**注意：**BMP 文件保存在原始图片目录下，采用相同的文件主名。如果目录中已存在同名 BMP，请预先备份，避免覆盖。
+**兼容性说明：**保留老版本的阈值极性：默认当 R+G+B 大于阈值时为黑色，开启取反则相反。字节以每页 128 字节、纵向最低位优先编码。
+
+**安全输出：**批量生成的 BMP 会使用 `-oled.bmp` 后缀；如已存在同名文件则自动增加数字后缀，不覆盖源文件或之前导出的图片。
 
 ## 源码构建
 
-需要 **.NET 10 SDK** 和 Windows 开发环境（也可以使用 Windows 构建代理）。
-
-```powershell
-dotnet restore PictureFetcher.csproj
-dotnet build PictureFetcher.csproj --configuration Release
-dotnet run --project PictureFetcher.csproj
-```
-
-发布独立运行的 Windows x64 单文件程序：
-
-```powershell
-dotnet publish PictureFetcher.csproj --configuration Release --runtime win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:DebugType=None --output publish/win-x64
-```
-
-## 自动化构建和发布
-
-- **CI**：每次推送以及 PR 都会触发 Windows 构建。
-- **Release**：推送 `v*` 标签后构建 Windows x64 和 ARM64 压缩包，并上传到 GitHub Releases；手动触发时只生成构建产物，不自动发布正式版本。
-
-合并 PR 后可通过标签发布：
+先安装 [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)。
 
 ```bash
-git tag v1.0.0
-git push origin v1.0.0
+dotnet restore PictureFetcher.sln
+dotnet build PictureFetcher.sln -c Release
+dotnet run --project PictureFetcher.csproj
+dotnet run --project tests/PictureFetcher.Core.Tests/PictureFetcher.Core.Tests.csproj
 ```
+
+发布特定架构的自包含单文件程序：
+
+```bash
+dotnet publish PictureFetcher.csproj -c Release -r osx-arm64 --self-contained true \
+  -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true \
+  -p:EnableCompressionInSingleFile=true -p:PublishReadyToRun=false \
+  -p:PublishTrimmed=false -p:DebugType=None -p:DebugSymbols=false
+```
+
+可将 RID 改为 `win-x64`、`linux-x64`、`osx-arm64` 或 `osx-x64`；正式发布建议在对应系统的 GitHub Actions Runner 上打包。
+
+## 自动化发布和瘦身策略
+
+CI 在四个架构上构建发布程序并执行核心回归测试，同时验证 ZIP、tar.gz、DMG 包能生成。合并后推送 `vX.Y.Z` 标签，即可发布四种包和 `SHA256SUMS.txt`。
+
+安装包采用单文件压缩、自包含但不混入其他架构运行时、移除调试符号、关闭 ReadyToRun 以降低体积。目前不启用不经验证的 IL Trimming，避免 Avalonia XAML 反射内容被错误删除导致软件打不开。详见[打包说明](docs/PACKAGING.md)。
 
 ## 开源许可
 
-使用 [MIT License](LICENSE) 授权。Copyright © 2019–2026 bestyize。
+[MIT License](LICENSE) · Copyright © 2019–2026 bestyize。
