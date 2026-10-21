@@ -15,4 +15,7 @@
   <ItemGroup>
     <Compile Remove="Properties/Settings.Designer.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="src/**/*.cs;tests/**/*.cs" />
+  </ItemGroup>
 </Project>
