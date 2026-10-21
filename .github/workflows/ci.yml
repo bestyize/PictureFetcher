@@ -31,3 +31,39 @@ jobs:
 
       - name: Build (Release)
         run: dotnet build PictureFetcher.csproj --configuration Release --no-restore
+
+  package-smoke:
+    name: Verify published ${{ matrix.rid }} executable
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        rid: [win-x64, win-arm64]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Publish self-contained single-file build
+        shell: pwsh
+        run: |
+          dotnet publish PictureFetcher.csproj `
+            --configuration Release `
+            --runtime ${{ matrix.rid }} `
+            --self-contained true `
+            -p:PublishSingleFile=true `
+            -p:IncludeNativeLibrariesForSelfExtract=true `
+            -p:DebugType=None `
+            -p:DebugSymbols=false `
+            --output publish/${{ matrix.rid }}
+
+      - name: Check published executable
+        shell: pwsh
+        run: |
+          if (-not (Test-Path "publish/${{ matrix.rid }}/PictureReader.exe")) {
+            throw "Missing PictureReader.exe in ${{ matrix.rid }} package"
+          }
