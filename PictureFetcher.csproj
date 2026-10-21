@@ -1,18 +1,29 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net10.0-windows</TargetFramework>
-    <UseWindowsForms>true</UseWindowsForms>
-    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>PictureReader</RootNamespace>
-    <AssemblyName>PictureReader</AssemblyName>
-    <ApplicationIcon>ldr_01.ico</ApplicationIcon>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <Nullable>disable</Nullable>
-    <ImplicitUsings>disable</ImplicitUsings>
+    <AssemblyName>PictureFetcher</AssemblyName>
+    <Version>2.0.0</Version>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <EnableDefaultEmbeddedResourceItems>false</EnableDefaultEmbeddedResourceItems>
+    <ApplicationIcon Condition="'$(RuntimeIdentifier)' == 'win-x64'">ldr_01.ico</ApplicationIcon>
+    <AvaloniaUseCompiledBindingsByDefault>false</AvaloniaUseCompiledBindingsByDefault>
   </PropertyGroup>
-  <!-- Legacy .NET Framework application settings are unused and depend on System.Configuration. -->
   <ItemGroup>
-    <Compile Remove="Properties/Settings.Designer.cs" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.3.20" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.20" />
+    <PackageReference Include="SkiaSharp" Version="3.119.4" />
+    <ProjectReference Include="src/PictureFetcher.Core/PictureFetcher.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <Compile Include="App.axaml.cs" />
+    <Compile Include="UiStrings.cs" />
+    <Compile Include="Views/MainWindow.axaml.cs" />
+    <EmbeddedResource Include="UiStrings.resx" />
+    <EmbeddedResource Include="UiStrings.zh-CN.resx" />
   </ItemGroup>
 </Project>

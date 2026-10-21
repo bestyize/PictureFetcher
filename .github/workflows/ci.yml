@@ -14,56 +14,77 @@ permissions:
   contents: read
 
 jobs:
-  build:
-    name: Build .NET 10 Windows Forms
-    runs-on: windows-latest
+  core-tests:
+    name: OLED conversion regression tests
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up .NET 10
-        uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
+      - name: Run portable conversion tests
+        run: dotnet run --project tests/PictureFetcher.Core.Tests/PictureFetcher.Core.Tests.csproj --configuration Release
 
-      - name: Restore
-        run: dotnet restore PictureFetcher.csproj
-
-      - name: Build (Release)
-        run: dotnet build PictureFetcher.csproj --configuration Release --no-restore
-
-  package-smoke:
-    name: Verify published ${{ matrix.rid }} executable
-    runs-on: windows-latest
+  desktop:
+    name: Publish ${{ matrix.rid }}
     strategy:
       fail-fast: false
       matrix:
-        rid: [win-x64, win-arm64]
+        include:
+          - rid: win-x64
+            os: windows-latest
+            executable: PictureFetcher.exe
+          - rid: linux-x64
+            os: ubuntu-latest
+            executable: PictureFetcher
+          - rid: osx-arm64
+            os: macos-15
+            executable: PictureFetcher
+          - rid: osx-x64
+            os: macos-15
+            executable: PictureFetcher
+    runs-on: ${{ matrix.os }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up .NET 10
-        uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
-
-      - name: Publish self-contained single-file build
+      - name: Publish self-contained single-file desktop app
+        shell: bash
+        run: |
+          dotnet publish PictureFetcher.csproj \
+            -c Release -r ${{ matrix.rid }} --self-contained true \
+            -p:PublishSingleFile=true \
+            -p:IncludeNativeLibrariesForSelfExtract=true \
+            -p:EnableCompressionInSingleFile=true \
+            -p:PublishReadyToRun=false \
+            -p:PublishTrimmed=false \
+            -p:DebugType=None -p:DebugSymbols=false \
+            -o publish/${{ matrix.rid }}
+      - name: Check bundle payload
+        shell: bash
+        run: |
+          test -s "publish/${{ matrix.rid }}/${{ matrix.executable }}"
+      - name: Verify macOS .app signing and DMG packaging
+        if: startsWith(matrix.rid, 'osx-')
+        shell: bash
+        run: bash packaging/macos/package.sh "${{ matrix.rid }}" "ci-${{ github.run_number }}" "publish/${{ matrix.rid }}"
+      - name: Verify Linux tarball packaging
+        if: matrix.rid == 'linux-x64'
+        shell: bash
+        run: bash packaging/linux/package.sh "ci-${{ github.run_number }}" publish/linux-x64
+      - name: Verify Windows ZIP packaging
+        if: matrix.rid == 'win-x64'
         shell: pwsh
         run: |
-          dotnet publish PictureFetcher.csproj `
-            --configuration Release `
-            --runtime ${{ matrix.rid }} `
-            --self-contained true `
-            -p:PublishSingleFile=true `
-            -p:IncludeNativeLibrariesForSelfExtract=true `
-            -p:DebugType=None `
-            -p:DebugSymbols=false `
-            --output publish/${{ matrix.rid }}
-
-      - name: Check published executable
-        shell: pwsh
+          New-Item -ItemType Directory -Path release-assets -Force | Out-Null
+          Compress-Archive -Path publish/win-x64/* -DestinationPath release-assets/PictureFetcher-ci-win-x64.zip
+      - name: Measure packaged distribution size
+        shell: bash
         run: |
-          if (-not (Test-Path "publish/${{ matrix.rid }}/PictureReader.exe")) {
-            throw "Missing PictureReader.exe in ${{ matrix.rid }} package"
-          }
+          ls -lh release-assets/
+          test -n "$(find release-assets -type f -size +1M -print -quit)"
+      - name: Record uncompressed payload size
+        shell: bash
+        run: |
+          du -sh "publish/${{ matrix.rid }}" || true

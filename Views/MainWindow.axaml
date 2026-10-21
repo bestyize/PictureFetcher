@@ -1,0 +1,89 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="PictureReader.MainWindow"
+        Title="PictureFetcher"
+        Width="1140" Height="790" MinWidth="760" MinHeight="600"
+        Background="#F5F6FA">
+  <Grid x:Name="LayoutRoot" ColumnDefinitions="232,*">
+    <Border x:Name="Sidebar" Grid.Column="0" Background="#EFF2F7" Padding="20">
+      <StackPanel Spacing="16">
+        <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,4,0,4">
+          <Border Width="38" Height="38" CornerRadius="12" Background="#3478F6">
+            <TextBlock Text="◈" FontSize="23" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+          </Border>
+          <StackPanel VerticalAlignment="Center" Spacing="2">
+            <TextBlock x:Name="BrandTitle" Text="PictureFetcher" FontSize="18" FontWeight="Bold" Foreground="#253148"/>
+            <TextBlock x:Name="BrandCaption" Text="OLED · 128 × 64" FontSize="11" Foreground="#8894A6"/>
+          </StackPanel>
+        </StackPanel>
+         <Border Height="1" Background="#DAE0EA" Margin="0,8"/>
+        <Button x:Name="OpenButton" Classes="primary" Content="Open image" Click="OnOpenClicked"/>
+        <Button x:Name="BatchButton" Classes="sidebar-action" Content="Batch convert" Click="OnBatchClicked"/>
+        <Button x:Name="SaveButton" Classes="sidebar-action" Content="Save BMP" Click="OnSaveClicked"/>
+        <Button x:Name="CopyButton" Classes="sidebar-action" Content="Copy data" Click="OnCopyClicked"/>
+        <Separator/>
+        <TextBlock x:Name="SettingsHeading" Classes="eyebrow" Text="WORKSPACE"/>
+        <TextBlock x:Name="LanguageLabel" Text="Language" Foreground="#64748B" FontSize="12"/>
+        <ComboBox x:Name="LanguagePicker" SelectedIndex="0">
+          <ComboBoxItem Content="English"/>
+          <ComboBoxItem Content="简体中文"/>
+        </ComboBox>
+        <Button x:Name="RepoButton" Classes="subtle-action" Content="GitHub source ↗" Click="OnRepoClicked"/>
+      </StackPanel>
+    </Border>
+    <Grid Grid.Column="1" RowDefinitions="Auto,*,Auto" Margin="27" RowSpacing="20">
+      <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
+        <StackPanel Spacing="4">
+          <TextBlock x:Name="PageTitle" Text="Image workspace" FontSize="27" FontWeight="Bold" Foreground="#17243D"/>
+          <TextBlock x:Name="PageCaption" Text="Prepare monochrome images for your 128×64 OLED." Foreground="#7B8799" FontSize="12"/>
+        </StackPanel>
+        <Border Grid.Column="1" CornerRadius="22" Padding="13,8" Background="#E8EFFD" VerticalAlignment="Center">
+          <TextBlock Text="128 × 64" FontSize="12" FontWeight="SemiBold" Foreground="#416BA8"/>
+        </Border>
+      </Grid>
+      <Grid Grid.Row="1" ColumnDefinitions="*,*" ColumnSpacing="16">
+        <Border x:Name="OriginalCard" Classes="surface" Grid.Column="0" Padding="18">
+          <Grid RowDefinitions="Auto,*" RowSpacing="12">
+            <TextBlock x:Name="OriginalHeading" Classes="eyebrow" Text="SOURCE"/>
+            <Grid Grid.Row="1">
+              <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="7">
+                <Border CornerRadius="26" Background="#F2F5FB" Width="52" Height="52">
+                  <TextBlock Text="＋" FontSize="26" Foreground="#7B91BC" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+                <TextBlock x:Name="EmptyHint" Text="Choose or drop an image" Foreground="#8794A9" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
+              </StackPanel>
+              <Image x:Name="SourcePreview" Stretch="Uniform"/>
+            </Grid>
+          </Grid>
+        </Border>
+        <Border x:Name="OutputCard" Classes="surface" Grid.Column="1" Padding="18">
+          <Grid RowDefinitions="Auto,*" RowSpacing="12">
+            <TextBlock x:Name="ConvertedHeading" Classes="eyebrow" Text="MONOCHROME PREVIEW"/>
+            <Image x:Name="ResultPreview" Grid.Row="1" Stretch="Uniform" RenderOptions.BitmapInterpolationMode="None"/>
+          </Grid>
+        </Border>
+      </Grid>
+      <Border Grid.Row="2" Classes="surface" Padding="18">
+        <Grid RowDefinitions="Auto,Auto,*" RowSpacing="12">
+          <Grid ColumnDefinitions="*,Auto">
+            <TextBlock x:Name="DataHeading" Text="OLED bitmap data" FontSize="16" FontWeight="SemiBold" Foreground="#26344A"/>
+            <TextBlock x:Name="DataHint" Grid.Column="1" Text="1024 bytes · page order" Foreground="#8693A7" FontSize="11"/>
+          </Grid>
+          <Grid Grid.Row="1" ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="12">
+            <TextBlock x:Name="ThresholdLabel" Text="Threshold" VerticalAlignment="Center" FontSize="12" Foreground="#64748B"/>
+            <Slider x:Name="ThresholdSlider" Grid.Column="1" Minimum="0" Maximum="765" Value="300" TickFrequency="15" ValueChanged="OnThresholdChanged"/>
+            <TextBlock x:Name="ThresholdValue" Grid.Column="2" Text="300" Width="32" VerticalAlignment="Center"/>
+            <CheckBox x:Name="InvertBox" Grid.Column="3" Content="Invert" IsChecked="False" Checked="OnSettingsChanged" Unchecked="OnSettingsChanged"/>
+            <ComboBox x:Name="FormatPicker" Grid.Column="4" SelectedIndex="0" SelectionChanged="OnSettingsChanged" Width="95">
+              <ComboBoxItem Content="HEX"/>
+              <ComboBoxItem Content="C array"/>
+            </ComboBox>
+          </Grid>
+          <TextBox x:Name="OutputText" Grid.Row="2" Height="165" Background="#F6F8FC" BorderBrush="#E6EAF2" BorderThickness="1" CornerRadius="10" Padding="12" AcceptsReturn="True" IsReadOnly="True"
+                   FontFamily="Consolas,Menlo,monospace" FontSize="12" TextWrapping="NoWrap"
+                   Watermark="Bitmap bytes will appear here"/>
+        </Grid>
+      </Border>
+    </Grid>
+  </Grid>
+</Window>

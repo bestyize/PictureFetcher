@@ -1,15 +1,11 @@
 using System;
-using System.Windows.Forms;
+using Avalonia;
 
-namespace PictureReader
+namespace PictureReader;
+
+internal static class Program
 {
-    internal static class Program
-    {
-        [STAThread]
-        private static void Main()
-        {
-            ApplicationConfiguration.Initialize();
-            Application.Run(new MainForm());
-        }
-    }
+    [STAThread]
+    private static void Main(string[] args) =>
+        AppBuilder.Configure<App>().UsePlatformDetect().StartWithClassicDesktopLifetime(args);
 }

@@ -16,47 +16,63 @@ concurrency:
 jobs:
   package:
     name: Package ${{ matrix.rid }}
-    runs-on: windows-latest
     strategy:
       fail-fast: false
       matrix:
-        rid: [win-x64, win-arm64]
+        include:
+          - rid: win-x64
+            os: windows-latest
+          - rid: linux-x64
+            os: ubuntu-latest
+          - rid: osx-arm64
+            os: macos-15
+          - rid: osx-x64
+            os: macos-15
+    runs-on: ${{ matrix.os }}
     env:
       RELEASE_LABEL: ${{ github.ref_type == 'tag' && github.ref_name || format('dev-{0}', github.run_number) }}
     steps:
-      - name: Checkout source
+      - name: Checkout
         uses: actions/checkout@v4
-
       - name: Set up .NET 10
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
+      - name: Publish self-contained single-file binary
+        shell: bash
+        run: |
+          dotnet publish PictureFetcher.csproj \
+            -c Release -r ${{ matrix.rid }} --self-contained true \
+            -p:PublishSingleFile=true \
+            -p:IncludeNativeLibrariesForSelfExtract=true \
+            -p:EnableCompressionInSingleFile=true \
+            -p:PublishReadyToRun=false \
+            -p:PublishTrimmed=false \
+            -p:DebugType=None -p:DebugSymbols=false \
+            -o publish/${{ matrix.rid }}
 
-      - name: Publish self-contained single-file executable
+      - name: Pack Windows x64 ZIP
+        if: matrix.rid == 'win-x64'
         shell: pwsh
         run: |
-          dotnet publish PictureFetcher.csproj `
-            --configuration Release `
-            --runtime ${{ matrix.rid }} `
-            --self-contained true `
-            -p:PublishSingleFile=true `
-            -p:IncludeNativeLibrariesForSelfExtract=true `
-            -p:DebugType=None `
-            -p:DebugSymbols=false `
-            --output publish/${{ matrix.rid }}
+          New-Item -ItemType Directory -Path release-assets -Force | Out-Null
+          Compress-Archive -Path "publish/win-x64/*" -DestinationPath "release-assets/PictureFetcher-$env:RELEASE_LABEL-win-x64.zip" -Force
 
-      - name: Create release archive
-        shell: pwsh
-        run: |
-          New-Item -ItemType Directory -Path packages -Force | Out-Null
-          $archive = "packages/PictureFetcher-$env:RELEASE_LABEL-${{ matrix.rid }}.zip"
-          Compress-Archive -Path "publish/${{ matrix.rid }}/*" -DestinationPath $archive -Force
+      - name: Pack Linux x64 tarball
+        if: matrix.rid == 'linux-x64'
+        shell: bash
+        run: bash packaging/linux/package.sh "$RELEASE_LABEL" publish/linux-x64
 
-      - name: Upload archive as workflow artifact
+      - name: Pack macOS DMG
+        if: startsWith(matrix.rid, 'osx-')
+        shell: bash
+        run: bash packaging/macos/package.sh "${{ matrix.rid }}" "$RELEASE_LABEL" "publish/${{ matrix.rid }}"
+
+      - name: Upload release artifacts
         uses: actions/upload-artifact@v4
         with:
           name: PictureFetcher-${{ matrix.rid }}
-          path: packages/*.zip
+          path: release-assets/*
           if-no-files-found: error
           retention-days: 14
 
@@ -68,23 +84,24 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Download packages
+      - name: Download packaged binaries
         uses: actions/download-artifact@v4
         with:
           path: release-assets
           merge-multiple: true
-
-      - name: Generate SHA-256 checksums
+      - name: Write SHA-256 checksums
         shell: bash
         run: |
           cd release-assets
-          sha256sum -- *.zip > SHA256SUMS.txt
-
-      - name: Publish tagged release
+          sha256sum -- *.zip *.tar.gz *.dmg > SHA256SUMS.txt
+          ls -lh
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: |
-            release-assets/*.zip
-            release-assets/SHA256SUMS.txt
           generate_release_notes: true
           fail_on_unmatched_files: true
+          files: |
+            release-assets/*.zip
+            release-assets/*.tar.gz
+            release-assets/*.dmg
+            release-assets/SHA256SUMS.txt
