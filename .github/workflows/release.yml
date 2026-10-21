@@ -63,9 +63,16 @@ jobs:
         shell: bash
         run: bash packaging/linux/package.sh "$RELEASE_LABEL" publish/linux-x64
 
-      - name: Pack macOS DMG
+      - name: Pack and optionally notarize macOS DMG
         if: startsWith(matrix.rid, 'osx-')
         shell: bash
+        env:
+          MACOS_CERTIFICATE_BASE64: ${{ secrets.MACOS_CERTIFICATE_BASE64 }}
+          MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+          MACOS_SIGNING_IDENTITY: ${{ secrets.MACOS_SIGNING_IDENTITY }}
+          APPLE_NOTARY_ID: ${{ secrets.APPLE_NOTARY_ID }}
+          APPLE_NOTARY_PASSWORD: ${{ secrets.APPLE_NOTARY_PASSWORD }}
+          APPLE_NOTARY_TEAM_ID: ${{ secrets.APPLE_NOTARY_TEAM_ID }}
         run: bash packaging/macos/package.sh "${{ matrix.rid }}" "$RELEASE_LABEL" "publish/${{ matrix.rid }}"
 
       - name: Upload release artifacts
