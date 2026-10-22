@@ -2,7 +2,7 @@
 
 **English** · [简体中文](README.zh-CN.md)
 
-A compact cross-platform image-to-bitmap desktop tool for **128 × 64 monochrome OLED displays**. Powered by .NET 10 and Avalonia.
+A cross-platform **embedded graphics studio** for preparing monochrome display assets and testing them in a virtual OLED screen. Powered by .NET 10 and Avalonia.
 
 ## Downloads
 
@@ -23,10 +23,14 @@ The binaries are self-contained, so you do **not** need to install the .NET 10 r
 
 - Native-feeling macOS-inspired desktop layout on Windows, Linux and macOS.
 - English / 简体中文 UI, with remembered language preference.
-- Open or drag an image into the editor; preview original and 128 × 64 output.
+- Open or drag an image into the editor; preview the original and the converted bitmap.
+- Choose SSD1306 128 × 64 or 128 × 32; output sizes and page-buffer lengths follow the profile.
+- Simulate a virtual OLED display with a pixel-grid bezel, cyan/amber/white illumination, power and hardware-style display inversion.
 - Adjustable threshold and invert control.
-- SSD1306 page-format output: hexadecimal byte stream or 1024-byte C array, with copy action.
+- SSD1306 page-format output: hexadecimal byte stream or a 1024-byte / 512-byte C array, with copy action.
 - Save individual BMP images or batch-convert multiple images.
+
+**Simulator scope:** The current simulator models page-ordered video RAM, individual page writes, display on/off and inversion. It does **not** yet decode SSD1306 commands, emulate I2C/SPI electrical behavior, or simulate full-color displays. See [Embedded studio architecture](docs/EMBEDDED_STUDIO.md) for the phased roadmap.
 
 **Conversion compatibility:** The original app's threshold polarity is preserved: a pixel with R+G+B above the threshold is rendered black (unless Invert is enabled). This can differ from other image tools. The OLED byte encoding is vertical LSB-first, in eight pages of 128 bytes.
 

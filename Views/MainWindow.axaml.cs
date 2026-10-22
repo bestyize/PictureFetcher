@@ -84,7 +84,7 @@ public partial class MainWindow : Window
         ConvertedHeading.Text = UiStrings.Get("ResizedImage");
         EmptyHint.Text = UiStrings.Get("DropImage");
         DataHeading.Text = UiStrings.Get("ImageArray");
-        DataHint.Text = UiStrings.Get("ArrayDescription");
+        DataHint.Text = string.Format(UiStrings.Get("ArrayProfileDescription"), SelectedDisplayProfile.BufferSize);
         ThresholdLabel.Text = UiStrings.Get("Threshold");
         InvertBox.Content = UiStrings.Get("Invert");
         OutputText.Watermark = UiStrings.Get("OutputPlaceholder");
@@ -177,7 +177,7 @@ public partial class MainWindow : Window
 
     private void RefreshSimulation()
     {
-        if (SimulatorPreview is null || ScreenPowerBox is null || PixelTintPicker is null)
+        if (SimulatorPreview is null || ScreenPowerBox is null || ScreenInvertBox is null || PixelTintPicker is null)
             return;
         _simulator ??= new ScreenSimulator(SelectedDisplayProfile);
         _simulator.IsPoweredOn = ScreenPowerBox.IsChecked == true;
