@@ -24,6 +24,8 @@ public partial class MainWindow : Window
     private int _sourceHeight;
     private MonochromeFrame? _frame;
     private ScreenSimulator? _simulator;
+    private Ssd1306CommandSimulator? _ssd1306Controller;
+    private Sh1106CommandSimulator? _sh1106Controller;
     private Bitmap? _simulationBitmap;
     private Bitmap? _sourceBitmap;
     private Bitmap? _resultBitmap;
@@ -42,6 +44,7 @@ public partial class MainWindow : Window
         {
             UiStrings.SetCulture(LanguagePicker.SelectedIndex == 1 ? "zh-CN" : "en-US");
             ApplyLanguage();
+            Rebuild();
         };
         DragDrop.SetAllowDrop(this, true);
         AddHandler(DragDrop.DragOverEvent, OnDragOver);
@@ -182,11 +185,34 @@ public partial class MainWindow : Window
 
     private void RefreshSimulation()
     {
-        if (SimulatorPreview is null || ScreenPowerBox is null || ScreenInvertBox is null || PixelTintPicker is null)
-            return;
-        _simulator ??= new ScreenSimulator(SelectedDisplayProfile);
-        _simulator.IsPoweredOn = ScreenPowerBox.IsChecked == true;
-        _simulator.IsInverted = ScreenInvertBox.IsChecked == true;
+        if (SimulatorPreview is null || ScreenPowerBox is null ||
+            ScreenInvertBox is null || PixelTintPicker is null) return;
+        bool on = ScreenPowerBox.IsChecked == true;
+        bool inverted = ScreenInvertBox.IsChecked == true;
+
+        // Every interactive power/invert operation travels through the controller's
+        // actual command parser, not a bitmap-only post-processing shortcut.
+        if (_ssd1306Controller is { } ssd)
+        {
+            ssd.WriteCommands(new byte[] {
+                on ? (byte)0xAF : (byte)0xAE, inverted ? (byte)0xA7 : (byte)0xA6
+            });
+            _simulator = ssd.SnapshotDisplay();
+        }
+        else if (_sh1106Controller is { } sh)
+        {
+            sh.WriteCommands(new byte[] {
+                on ? (byte)0xAF : (byte)0xAE, inverted ? (byte)0xA7 : (byte)0xA6
+            });
+            _simulator = sh.SnapshotDisplay();
+        }
+        else
+        {
+            _simulator ??= new ScreenSimulator(SelectedDisplayProfile);
+            _simulator.IsPoweredOn = on;
+            _simulator.IsInverted = inverted;
+        }
+
         SKColor tint = PixelTintPicker.SelectedIndex switch
         {
             1 => new SKColor(255, 191, 79),
@@ -212,6 +238,8 @@ public partial class MainWindow : Window
             UiStrings.Get(isSh1106 ? "Sh1106ArrayDescription" : "ArrayProfileDescription"),
             profile.BufferSize);
         ControllerCommandHint.Text = UiStrings.Get(isSh1106 ? "Sh1106ProtocolHint" : "Ssd1306ProtocolHint");
+        _ssd1306Controller = null;
+        _sh1106Controller = null;
         _simulator = new ScreenSimulator(profile);
         if (_rgba is null)
         {
@@ -224,21 +252,17 @@ public partial class MainWindow : Window
         // Route display preview through the same command/data paths that firmware uses.
         if (isSh1106)
         {
-            var device = new Sh1106CommandSimulator(profile);
-            device.LoadVisibleFrame(_frame);
-            device.WriteCommand(0xAF);
-            _simulator = device.SnapshotDisplay();
+            _sh1106Controller = new Sh1106CommandSimulator(profile);
+            _sh1106Controller.LoadVisibleFrame(_frame);
         }
         else
         {
-            var device = new Ssd1306CommandSimulator(profile);
-            device.WriteCommands(new byte[] {
+            _ssd1306Controller = new Ssd1306CommandSimulator(profile);
+            _ssd1306Controller.WriteCommands(new byte[] {
                 0x20, 0x00, 0x21, 0x00, (byte)(profile.Width - 1),
                 0x22, 0x00, (byte)(profile.PageCount - 1)
             });
-            device.WriteData(_frame.ToPageBytes());
-            device.WriteCommand(0xAF);
-            _simulator = device.SnapshotDisplay();
+            _ssd1306Controller.WriteData(_frame.ToPageBytes());
         }
         using var imageStream = new MemoryStream(_frame.ToBmp());
         var next = new Bitmap(imageStream);
