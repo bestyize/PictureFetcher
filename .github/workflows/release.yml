@@ -6,6 +6,7 @@ on:
       - master
     paths:
       - VERSION
+      - RELEASE_TRIGGER
     tags:
       - 'v*'
   workflow_dispatch:
@@ -130,7 +131,8 @@ jobs:
           TAG: ${{ steps.release_version.outputs.tag }}
         run: |
           set -euo pipefail
-          current="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$TAG" --jq '.object.sha' 2>/dev/null || true)"
+          # Query git refs rather than parsing a REST 404 error body as a tag SHA.
+          current="$(git ls-remote --tags origin "refs/tags/$TAG" | awk '{print $1}')"
           if [[ -n "$current" ]]; then
             [[ "$current" == "$GITHUB_SHA" ]] || { echo "Tag $TAG already targets another commit ($current)" >&2; exit 1; }
           else
