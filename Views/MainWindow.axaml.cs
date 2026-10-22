@@ -55,20 +55,19 @@ public partial class MainWindow : Window
         Rebuild();
         if (Environment.GetEnvironmentVariable("PICTUREFETCHER_UI_SMOKE") == "1")
         {
-            Opened += (_, _) =>
+            // Verify live controls immediately after the XAML tree is initialized.
+            // The Opened event is not guaranteed on every headless CI window server.
+            try
             {
-                try
-                {
-                    RunUiSmoke();
-                    Console.WriteLine("PASS: Avalonia screen controls, SSD1306/SH1106, exports, zh-CN/en-US");
-                    Environment.Exit(0);
-                }
-                catch (Exception error)
-                {
-                    Console.Error.WriteLine("FAIL: Avalonia UI smoke: " + error);
-                    Environment.Exit(1);
-                }
-            };
+                RunUiSmoke();
+                Console.WriteLine("PASS: Avalonia screen controls, SSD1306/SH1106, exports, zh-CN/en-US");
+                Environment.Exit(0);
+            }
+            catch (Exception error)
+            {
+                Console.Error.WriteLine("FAIL: Avalonia UI smoke: " + error);
+                Environment.Exit(1);
+            }
         }
     }
 

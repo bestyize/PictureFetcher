@@ -80,8 +80,19 @@ jobs:
         if: matrix.rid == 'linux-x64'
         shell: bash
         run: |
-          timeout 20s xvfb-run -a env PICTUREFETCHER_UI_SMOKE=1 \
-            ./publish/linux-x64/PictureFetcher
+          set -euo pipefail
+          if ! command -v xvfb-run >/dev/null 2>&1; then
+            sudo apt-get update -qq
+            sudo apt-get install -y xvfb
+          fi
+          set +e
+          timeout 35s xvfb-run -a env PICTUREFETCHER_UI_SMOKE=1 \
+            ./publish/linux-x64/PictureFetcher > /tmp/picturefetcher-smoke.log 2>&1
+          result=$?
+          set -e
+          cat /tmp/picturefetcher-smoke.log
+          echo "UI smoke exit code: $result"
+          test "$result" -eq 0
       - name: Record uncompressed payload size
         shell: bash
         run: |
