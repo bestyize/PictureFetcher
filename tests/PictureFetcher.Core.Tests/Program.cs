@@ -55,4 +55,54 @@ try { sim.LoadPageBytes(new byte[1024]); throw new Exception("Missing profile by
 catch (ArgumentException) { Console.WriteLine("PASS: Invalid framebuffer length rejected"); }
 try { sim.WritePage(0, 127, new byte[2]); throw new Exception("Missing page bounds check"); }
 catch (ArgumentException) { Console.WriteLine("PASS: Out-of-bounds page write rejected"); }
+
+var controller = new Ssd1306CommandSimulator(DisplayProfiles.Ssd1306_128x64);
+Check(controller.AddressingMode == Ssd1306AddressingMode.Page && !controller.DisplayEnabled,
+    "SSD1306 hardware reset mode and display state");
+controller.WriteCommands(new byte[] { 0x20, 0x00, 0x21, 0x02, 0x03, 0x22, 0x01, 0x02 });
+controller.WriteData(new byte[] { 0x01, 0x02, 0x04, 0x08, 0x10 });
+var gddram = controller.ReadGddram();
+Check(gddram[128 + 2] == 0x01 && gddram[128 + 3] == 0x02 &&
+      gddram[256 + 2] == 0x04 && gddram[256 + 3] == 0x08 &&
+      gddram[128 + 2] == 0x10, "SSD1306 horizontal window wraps columns and pages");
+Check(controller.CurrentPage == 1 && controller.CurrentColumn == 3,
+    "SSD1306 address cursor updates after full window wrap");
+controller.WriteCommands(new byte[] { 0x20, 0x01, 0x21, 0, 1, 0x22, 0, 1 });
+controller.WriteData(new byte[] { 0x11, 0x22, 0x33 });
+Check(controller.ReadGddram()[0] == 0x11 && controller.ReadGddram()[128] == 0x22 &&
+      controller.ReadGddram()[1] == 0x33, "SSD1306 vertical addressing increments pages first");
+controller.Reset();
+controller.WriteCommands(new byte[] { 0xB1, 0x03, 0x10 });
+controller.WriteData(new byte[] { 0x80 });
+controller.WriteCommand(0xAF);
+Check(controller.PixelIsLit(3, 15), "SSD1306 page-addressed GDDRAM appears on screen");
+controller.WriteCommand(0xA7);
+Check(!controller.PixelIsLit(3, 15) && controller.PixelIsLit(2, 15),
+    "SSD1306 inverse display is visible without changing RAM");
+controller.WriteCommand(0xA6);
+controller.WriteCommand(0xA1);
+Check(controller.PixelIsLit(124, 15), "SSD1306 segment remap mirrors column mapping");
+controller.WriteCommand(0xA0);
+controller.WriteCommand(0xC8);
+Check(controller.PixelIsLit(3, 48), "SSD1306 COM scan direction changes visible row");
+controller.WriteCommand(0xC0);
+controller.WriteCommands(new byte[] { 0xD3, 0x01 });
+Check(controller.PixelIsLit(3, 14), "SSD1306 display offset shifts visible scan");
+controller.WriteCommand(0xA5);
+Check(controller.PixelIsLit(0, 0) && controller.PixelIsLit(127, 63),
+    "SSD1306 force-all-on overrides video RAM");
+controller.WriteCommand(0xAE);
+Check(!controller.PixelIsLit(0, 0) && controller.ReadGddram()[128 + 3] == 0x80,
+    "SSD1306 power-off blanks display without clearing RAM");
+Check(controller.SnapshotDisplay().ReadPageBytes().All(b => b == 0),
+    "SSD1306 snapshot obeys display enable");
+controller.Reset();
+controller.WriteCommand(0x21);
+Check(controller.AwaitingCommandParameters, "Multi-byte SSD1306 command can span calls");
+try { controller.WriteData(new byte[] { 0 }); throw new Exception("Missing unfinished-command guard"); }
+catch (InvalidOperationException) { Console.WriteLine("PASS: Unfinished command blocks data writes"); }
+controller.WriteCommands(new byte[] { 0, 127 });
+try { controller.WriteCommand(0x26); throw new Exception("Unsupported scrolling silently accepted"); }
+catch (NotSupportedException) { Console.WriteLine("PASS: Unsupported scroll rejected explicitly"); }
+
 Console.WriteLine("All core tests passed.");
