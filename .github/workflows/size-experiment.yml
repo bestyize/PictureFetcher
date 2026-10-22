@@ -33,10 +33,10 @@ jobs:
           set -euo pipefail
           test -s "artifacts/baseline/${{ matrix.executable }}"
           test -s "artifacts/partial-trim/${{ matrix.executable }}"
-          tar -czf "$RUNNER_TEMP/reference.tar.gz" -C artifacts/baseline .
-          tar -czf "$RUNNER_TEMP/candidate.tar.gz" -C artifacts/partial-trim .
-          reference="$(wc -c < "$RUNNER_TEMP/reference.tar.gz" | tr -d '[:space:]')"
-          candidate="$(wc -c < "$RUNNER_TEMP/candidate.tar.gz" | tr -d '[:space:]')"
+          tar -czf "pf-reference.tar.gz" -C artifacts/baseline .
+          tar -czf "pf-candidate.tar.gz" -C artifacts/partial-trim .
+          reference="$(wc -c < "pf-reference.tar.gz" | tr -d '[:space:]')"
+          candidate="$(wc -c < "pf-candidate.tar.gz" | tr -d '[:space:]')"
           echo "SIZE_REFERENCE_BYTES=$reference"
           echo "SIZE_CANDIDATE_BYTES=$candidate"
           echo "SIZE_SAVED_BYTES=$((reference - candidate))"
@@ -56,8 +56,8 @@ jobs:
             sudo apt-get update -qq && sudo apt-get install -y xvfb
           fi
           set +e
-          timeout 14s xvfb-run -a artifacts/partial-trim/PictureFetcher > /tmp/trimmed-gui.log 2>&1
+          timeout 20s xvfb-run -a env PICTUREFETCHER_UI_SMOKE=1 artifacts/partial-trim/PictureFetcher > /tmp/trimmed-gui.log 2>&1
           result=$?
           set -e
           cat /tmp/trimmed-gui.log
-          test "$result" -eq 124
+          test "$result" -eq 0

@@ -53,6 +53,65 @@ public partial class MainWindow : Window
         SizeChanged += (_, _) => AdaptLayout();
         AdaptLayout();
         Rebuild();
+        if (Environment.GetEnvironmentVariable("PICTUREFETCHER_UI_SMOKE") == "1")
+        {
+            Opened += (_, _) =>
+            {
+                try
+                {
+                    RunUiSmoke();
+                    Console.WriteLine("PASS: Avalonia screen controls, SSD1306/SH1106, exports, zh-CN/en-US");
+                    Environment.Exit(0);
+                }
+                catch (Exception error)
+                {
+                    Console.Error.WriteLine("FAIL: Avalonia UI smoke: " + error);
+                    Environment.Exit(1);
+                }
+            };
+        }
+    }
+
+    // Opt-in CI smoke uses the actual compiled desktop executable, not a test-only UI mock.
+    // It covers reflection-sensitive XAML, localization resources and controller rendering.
+    private void RunUiSmoke()
+    {
+        _rgba = new byte[] { 0, 0, 0, 255 };
+        _sourceWidth = 1;
+        _sourceHeight = 1;
+        for (int profile = 0; profile < 3; profile++)
+        {
+            DisplayProfilePicker.SelectedIndex = profile;
+            for (int format = 0; format < 3; format++)
+            {
+                FormatPicker.SelectedIndex = format;
+                Rebuild();
+                int expected = profile == 1 ? 512 : 1024;
+                if (_frame?.ToPageBytes().Length != expected)
+                    throw new InvalidOperationException("Wrong packed pixel data size.");
+                if (string.IsNullOrWhiteSpace(OutputText.Text) || SimulatorPreview.Source is null)
+                    throw new InvalidOperationException("Device renderer or output format failed.");
+            }
+            ScreenPowerBox.IsChecked = false;
+            RefreshSimulation();
+            if (_simulator?.PixelIsLit(0, 0) == true)
+                throw new InvalidOperationException("Power-off did not blank the simulated display.");
+            ScreenPowerBox.IsChecked = true;
+            ScreenInvertBox.IsChecked = true;
+            RefreshSimulation();
+            ScreenInvertBox.IsChecked = false;
+            RefreshSimulation();
+            if (_simulator?.PixelIsLit(0, 0) != true)
+                throw new InvalidOperationException("Device frame was not restored.");
+        }
+        UiStrings.SetCulture("zh-CN");
+        ApplyLanguage();
+        if (ProfileLabel.Text != "屏幕")
+            throw new InvalidOperationException("zh-CN resources were unavailable.");
+        UiStrings.SetCulture("en-US");
+        ApplyLanguage();
+        if (ProfileLabel.Text != "Screen")
+            throw new InvalidOperationException("en-US resources were unavailable.");
     }
 
     private DisplayProfile SelectedDisplayProfile => DisplayProfilePicker?.SelectedIndex switch
