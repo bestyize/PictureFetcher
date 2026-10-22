@@ -21,7 +21,9 @@ public partial class MainWindow : Window
     private byte[]? _rgba;
     private int _sourceWidth;
     private int _sourceHeight;
-    private OledFrame? _frame;
+    private MonochromeFrame? _frame;
+    private ScreenSimulator? _simulator;
+    private Bitmap? _simulationBitmap;
     private Bitmap? _sourceBitmap;
     private Bitmap? _resultBitmap;
 
@@ -46,7 +48,12 @@ public partial class MainWindow : Window
         ApplyLanguage();
         SizeChanged += (_, _) => AdaptLayout();
         AdaptLayout();
+        Rebuild();
     }
+
+    private DisplayProfile SelectedDisplayProfile =>
+        DisplayProfilePicker?.SelectedIndex == 1
+            ? DisplayProfiles.Ssd1306_128x32 : DisplayProfiles.Ssd1306_128x64;
 
     private void AdaptLayout()
     {
@@ -77,10 +84,18 @@ public partial class MainWindow : Window
         ConvertedHeading.Text = UiStrings.Get("ResizedImage");
         EmptyHint.Text = UiStrings.Get("DropImage");
         DataHeading.Text = UiStrings.Get("ImageArray");
-        DataHint.Text = UiStrings.Get("ArrayDescription");
+        DataHint.Text = string.Format(UiStrings.Get("ArrayProfileDescription"), SelectedDisplayProfile.BufferSize);
         ThresholdLabel.Text = UiStrings.Get("Threshold");
         InvertBox.Content = UiStrings.Get("Invert");
         OutputText.Watermark = UiStrings.Get("OutputPlaceholder");
+        ProfileLabel.Text = UiStrings.Get("DisplayProfile");
+        TintLabel.Text = UiStrings.Get("PixelTint");
+        ScreenPowerBox.Content = UiStrings.Get("DevicePower");
+        ScreenInvertBox.Content = UiStrings.Get("DeviceInvert");
+        RawPreviewLabel.Text = UiStrings.Get("RawBitmap");
+        CyanOption.Content = UiStrings.Get("TintCyan");
+        AmberOption.Content = UiStrings.Get("TintAmber");
+        WhiteOption.Content = UiStrings.Get("TintWhite");
     }
 
     private void OnDragOver(object? sender, DragEventArgs e)
@@ -156,19 +171,55 @@ public partial class MainWindow : Window
 
     private void OnSettingsChanged(object? sender, RoutedEventArgs e) => Rebuild();
 
+    private void OnDisplayProfileChanged(object? sender, SelectionChangedEventArgs e) => Rebuild();
+
+    private void OnSimulationSettingChanged(object? sender, RoutedEventArgs e) => RefreshSimulation();
+
+    private void RefreshSimulation()
+    {
+        if (SimulatorPreview is null || ScreenPowerBox is null || ScreenInvertBox is null || PixelTintPicker is null)
+            return;
+        _simulator ??= new ScreenSimulator(SelectedDisplayProfile);
+        _simulator.IsPoweredOn = ScreenPowerBox.IsChecked == true;
+        _simulator.IsInverted = ScreenInvertBox.IsChecked == true;
+        SKColor tint = PixelTintPicker.SelectedIndex switch
+        {
+            1 => new SKColor(255, 191, 79),
+            2 => new SKColor(238, 250, 255),
+            _ => new SKColor(89, 225, 250)
+        };
+        var next = ScreenPreviewRenderer.Render(_simulator, tint);
+        SimulatorPreview.Source = next;
+        _simulationBitmap?.Dispose();
+        _simulationBitmap = next;
+    }
+
     private void Rebuild()
     {
-        if (ThresholdValue is null || FormatPicker is null || OutputText is null) return;
+        if (ThresholdValue is null || FormatPicker is null || OutputText is null ||
+            DisplayProfilePicker is null || ProfileBadge is null) return;
+        var profile = SelectedDisplayProfile;
         ThresholdValue.Text = ((int)ThresholdSlider.Value).ToString();
-        if (_rgba is null) return;
-        _frame = OledConverter.Convert(_rgba, _sourceWidth, _sourceHeight,
-            (int)ThresholdSlider.Value, InvertBox.IsChecked == true);
+        ProfileBadge.Text = $"{profile.Width} × {profile.Height}";
+        SimulationStatus.Text = $"{profile.BufferSize} B";
+        DataHint.Text = string.Format(UiStrings.Get("ArrayProfileDescription"), profile.BufferSize);
+        _simulator = new ScreenSimulator(profile);
+        if (_rgba is null)
+        {
+            RefreshSimulation();
+            return;
+        }
+
+        _frame = MonochromeConverter.Convert(_rgba, _sourceWidth, _sourceHeight,
+            profile, (int)ThresholdSlider.Value, InvertBox.IsChecked == true);
+        _simulator.LoadFrame(_frame);
         using var imageStream = new MemoryStream(_frame.ToBmp());
         var next = new Bitmap(imageStream);
         ResultPreview.Source = next;
         _resultBitmap?.Dispose();
         _resultBitmap = next;
         OutputText.Text = FormatPicker.SelectedIndex == 1 ? _frame.ToCArray() : _frame.ToHexText();
+        RefreshSimulation();
     }
 
     private async void OnSaveClicked(object? sender, RoutedEventArgs e)
@@ -179,7 +230,7 @@ public partial class MainWindow : Window
             var file = await StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
             {
                 Title = UiStrings.Get("SaveFile"),
-                SuggestedFileName = "oled-128x64.bmp",
+                SuggestedFileName = $"oled-{_frame.Profile.Width}x{_frame.Profile.Height}.bmp",
                 DefaultExtension = "bmp",
                 FileTypeChoices = new[] { new FilePickerFileType("Bitmap") { Patterns = new[] { "*.bmp" } } },
                 ShowOverwritePrompt = true
@@ -215,8 +266,8 @@ public partial class MainWindow : Window
                     ?? throw new InvalidDataException(UiStrings.Get("InvalidImage"));
                 if ((long)decoded.Width * decoded.Height > 80_000_000)
                     throw new InvalidDataException(UiStrings.Get("ImageTooLarge"));
-                OledFrame frame = OledConverter.Convert(CopyRgba(decoded), decoded.Width, decoded.Height,
-                    (int)ThresholdSlider.Value, InvertBox.IsChecked == true);
+                MonochromeFrame frame = MonochromeConverter.Convert(CopyRgba(decoded), decoded.Width, decoded.Height,
+                    SelectedDisplayProfile, (int)ThresholdSlider.Value, InvertBox.IsChecked == true);
                 // Never overwrite a source BMP or existing export.
                 string folder = Path.GetDirectoryName(localPath)!;
                 string stem = Path.GetFileNameWithoutExtension(localPath);
@@ -258,6 +309,7 @@ public partial class MainWindow : Window
     {
         _sourceBitmap?.Dispose();
         _resultBitmap?.Dispose();
+        _simulationBitmap?.Dispose();
         base.OnClosed(e);
     }
 }

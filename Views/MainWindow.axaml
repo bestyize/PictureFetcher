@@ -2,7 +2,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         x:Class="PictureReader.MainWindow"
         Title="PictureFetcher"
-        Width="1140" Height="790" MinWidth="760" MinHeight="600"
+        Width="1200" Height="820" MinWidth="820" MinHeight="630"
         Background="#F5F6FA">
   <Grid x:Name="LayoutRoot" ColumnDefinitions="232,*">
     <Border x:Name="Sidebar" Grid.Column="0" Background="#EFF2F7" Padding="20">
@@ -38,7 +38,7 @@
           <TextBlock x:Name="PageCaption" Text="Prepare monochrome images for your 128×64 OLED." Foreground="#7B8799" FontSize="12"/>
         </StackPanel>
         <Border Grid.Column="1" CornerRadius="22" Padding="13,8" Background="#E8EFFD" VerticalAlignment="Center">
-          <TextBlock Text="128 × 64" FontSize="12" FontWeight="SemiBold" Foreground="#416BA8"/>
+          <TextBlock x:Name="ProfileBadge" Text="128 × 64" FontSize="12" FontWeight="SemiBold" Foreground="#416BA8"/>
         </Border>
       </Grid>
       <Grid Grid.Row="1" ColumnDefinitions="*,*" ColumnSpacing="16">
@@ -57,9 +57,40 @@
           </Grid>
         </Border>
         <Border x:Name="OutputCard" Classes="surface" Grid.Column="1" Padding="18">
-          <Grid RowDefinitions="Auto,*" RowSpacing="12">
-            <TextBlock x:Name="ConvertedHeading" Classes="eyebrow" Text="MONOCHROME PREVIEW"/>
-            <Image x:Name="ResultPreview" Grid.Row="1" Stretch="Uniform" RenderOptions.BitmapInterpolationMode="None"/>
+          <Grid RowDefinitions="Auto,Auto,*,Auto,Auto" RowSpacing="10">
+            <TextBlock x:Name="ConvertedHeading" Classes="eyebrow" Text="DEVICE SIMULATOR"/>
+            <Grid Grid.Row="1" ColumnDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="8">
+              <TextBlock x:Name="ProfileLabel" Text="Screen" FontSize="11" Foreground="#64748B" VerticalAlignment="Center"/>
+              <ComboBox x:Name="DisplayProfilePicker" Grid.Column="1" Width="157" SelectedIndex="0"
+                        SelectionChanged="OnDisplayProfileChanged">
+                <ComboBoxItem Content="SSD1306 · 128×64"/>
+                <ComboBoxItem Content="SSD1306 · 128×32"/>
+              </ComboBox>
+              <TextBlock x:Name="TintLabel" Grid.Column="2" Text="Color" FontSize="11" Foreground="#64748B" VerticalAlignment="Center"/>
+              <ComboBox x:Name="PixelTintPicker" Grid.Column="3" Width="83" SelectedIndex="0"
+                        SelectionChanged="OnSimulationSettingChanged">
+                <ComboBoxItem x:Name="CyanOption" Content="Cyan"/>
+                <ComboBoxItem x:Name="AmberOption" Content="Amber"/>
+                <ComboBoxItem x:Name="WhiteOption" Content="White"/>
+              </ComboBox>
+            </Grid>
+            <Image x:Name="SimulatorPreview" Grid.Row="2" Stretch="Uniform"
+                   HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
+            <Grid Grid.Row="3" ColumnDefinitions="Auto,Auto,*" ColumnSpacing="14">
+              <CheckBox x:Name="ScreenPowerBox" Content="Power" IsChecked="True"
+                        Checked="OnSimulationSettingChanged" Unchecked="OnSimulationSettingChanged"/>
+              <CheckBox x:Name="ScreenInvertBox" Grid.Column="1" Content="Display invert"
+                        Checked="OnSimulationSettingChanged" Unchecked="OnSimulationSettingChanged"/>
+              <TextBlock x:Name="SimulationStatus" Grid.Column="2" HorizontalAlignment="Right"
+                         VerticalAlignment="Center" FontSize="11" Foreground="#8794A9" Text="1024 B"/>
+            </Grid>
+            <Grid Grid.Row="4" ColumnDefinitions="*,Auto" ColumnSpacing="12">
+              <TextBlock x:Name="RawPreviewLabel" Text="RAW BITMAP" Classes="eyebrow" VerticalAlignment="Center"/>
+              <Border Grid.Column="1" Background="#F2F5FA" Padding="4" CornerRadius="7">
+                <Image x:Name="ResultPreview" Width="128" Height="64" Stretch="Uniform"
+                       RenderOptions.BitmapInterpolationMode="None"/>
+              </Border>
+            </Grid>
           </Grid>
         </Border>
       </Grid>
