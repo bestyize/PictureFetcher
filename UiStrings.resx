@@ -4,13 +4,13 @@
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
-  <data name="WindowTitle" xml:space="preserve"><value>PictureFetcher — OLED 128×64 image converter</value></data>
+  <data name="WindowTitle" xml:space="preserve"><value>PictureFetcher — Embedded Graphics Studio</value></data>
   <data name="Language" xml:space="preserve"><value>Language</value></data>
   <data name="BatchConvert" xml:space="preserve"><value>Batch convert</value></data>
   <data name="SingleConvert" xml:space="preserve"><value>Open image</value></data>
   <data name="SaveFile" xml:space="preserve"><value>Save BMP</value></data>
   <data name="OriginalImage" xml:space="preserve"><value>Original image</value></data>
-  <data name="ResizedImage" xml:space="preserve"><value>128×64 preview</value></data>
+  <data name="ResizedImage" xml:space="preserve"><value>DEVICE SIMULATOR</value></data>
   <data name="ImageArray" xml:space="preserve"><value>Bitmap array</value></data>
   <data name="Threshold" xml:space="preserve"><value>Threshold</value></data>
   <data name="AsciiMode" xml:space="preserve"><value>Hex mode</value></data>
@@ -23,9 +23,9 @@
   <data name="SaveCompleted" xml:space="preserve"><value>BMP file saved successfully.</value></data>
   <data name="SelectImageFirst" xml:space="preserve"><value>Select an image first.</value></data>
   <data name="Information" xml:space="preserve"><value>Information</value></data>
-  <data name="BrandCaption" xml:space="preserve"><value>OLED image studio</value></data>
-  <data name="Workspace" xml:space="preserve"><value>Image workspace</value></data>
-  <data name="WorkspaceDescription" xml:space="preserve"><value>Convert images into 128 × 64 OLED-ready pixels.</value></data>
+  <data name="BrandCaption" xml:space="preserve"><value>Embedded graphics studio</value></data>
+  <data name="Workspace" xml:space="preserve"><value>Graphics workspace</value></data>
+  <data name="WorkspaceDescription" xml:space="preserve"><value>Prepare embedded display assets and preview them on a virtual screen.</value></data>
   <data name="CopyData" xml:space="preserve"><value>Copy bitmap data</value></data>
   <data name="Settings" xml:space="preserve"><value>WORKSPACE</value></data>
   <data name="DropImage" xml:space="preserve"><value>Open or drop an image here</value></data>
@@ -35,4 +35,13 @@
   <data name="ImageTooLarge" xml:space="preserve"><value>The image exceeds the 80 megapixel safety limit.</value></data>
   <data name="BatchCompletedCount" xml:space="preserve"><value>Saved {0} OLED BMP image(s).</value></data>
   <data name="Error" xml:space="preserve"><value>Error</value></data>
+  <data name="DisplayProfile" xml:space="preserve"><value>Screen</value></data>
+  <data name="PixelTint" xml:space="preserve"><value>Color</value></data>
+  <data name="DevicePower" xml:space="preserve"><value>Power</value></data>
+  <data name="DeviceInvert" xml:space="preserve"><value>Display invert</value></data>
+  <data name="RawBitmap" xml:space="preserve"><value>RAW BITMAP</value></data>
+  <data name="TintCyan" xml:space="preserve"><value>Cyan</value></data>
+  <data name="TintAmber" xml:space="preserve"><value>Amber</value></data>
+  <data name="TintWhite" xml:space="preserve"><value>White</value></data>
+  <data name="ArrayProfileDescription" xml:space="preserve"><value>{0} bytes · SSD1306 page order</value></data>
 </root>

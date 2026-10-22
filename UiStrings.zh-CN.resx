@@ -4,13 +4,13 @@
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
-  <data name="WindowTitle" xml:space="preserve"><value>PictureFetcher — OLED 128×64 图像取模</value></data>
+  <data name="WindowTitle" xml:space="preserve"><value>PictureFetcher — 嵌入式图形工作室</value></data>
   <data name="Language" xml:space="preserve"><value>语言</value></data>
   <data name="BatchConvert" xml:space="preserve"><value>批量转换</value></data>
   <data name="SingleConvert" xml:space="preserve"><value>单个转换</value></data>
   <data name="SaveFile" xml:space="preserve"><value>保存 BMP</value></data>
   <data name="OriginalImage" xml:space="preserve"><value>原图</value></data>
-  <data name="ResizedImage" xml:space="preserve"><value>缩放图像</value></data>
+  <data name="ResizedImage" xml:space="preserve"><value>屏幕模拟器</value></data>
   <data name="ImageArray" xml:space="preserve"><value>图像数组</value></data>
   <data name="Threshold" xml:space="preserve"><value>阈值</value></data>
   <data name="AsciiMode" xml:space="preserve"><value>十六进制模式</value></data>
@@ -23,9 +23,9 @@
   <data name="SaveCompleted" xml:space="preserve"><value>BMP 文件保存成功。</value></data>
   <data name="SelectImageFirst" xml:space="preserve"><value>请先选择图像。</value></data>
   <data name="Information" xml:space="preserve"><value>提示</value></data>
-  <data name="BrandCaption" xml:space="preserve"><value>OLED 图像工作室</value></data>
-  <data name="Workspace" xml:space="preserve"><value>图像工作台</value></data>
-  <data name="WorkspaceDescription" xml:space="preserve"><value>将图片转换为适用于 128 × 64 OLED 屏幕的数据。</value></data>
+  <data name="BrandCaption" xml:space="preserve"><value>嵌入式图形工作室</value></data>
+  <data name="Workspace" xml:space="preserve"><value>图形资源工作台</value></data>
+  <data name="WorkspaceDescription" xml:space="preserve"><value>制作嵌入式屏幕资源，并在虚拟屏幕上实时预览。</value></data>
   <data name="CopyData" xml:space="preserve"><value>复制字模数据</value></data>
   <data name="Settings" xml:space="preserve"><value>工作区</value></data>
   <data name="DropImage" xml:space="preserve"><value>打开图片或拖入图片</value></data>
@@ -35,4 +35,13 @@
   <data name="ImageTooLarge" xml:space="preserve"><value>图片超过 8000 万像素安全限制。</value></data>
   <data name="BatchCompletedCount" xml:space="preserve"><value>已保存 {0} 张 OLED BMP 图像。</value></data>
   <data name="Error" xml:space="preserve"><value>错误</value></data>
+  <data name="DisplayProfile" xml:space="preserve"><value>屏幕</value></data>
+  <data name="PixelTint" xml:space="preserve"><value>颜色</value></data>
+  <data name="DevicePower" xml:space="preserve"><value>电源</value></data>
+  <data name="DeviceInvert" xml:space="preserve"><value>屏幕反色</value></data>
+  <data name="RawBitmap" xml:space="preserve"><value>原始点阵</value></data>
+  <data name="TintCyan" xml:space="preserve"><value>青蓝</value></data>
+  <data name="TintAmber" xml:space="preserve"><value>琥珀</value></data>
+  <data name="TintWhite" xml:space="preserve"><value>白色</value></data>
+  <data name="ArrayProfileDescription" xml:space="preserve"><value>{0} 字节 · SSD1306 页序</value></data>
 </root>
