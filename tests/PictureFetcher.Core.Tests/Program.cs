@@ -31,4 +31,28 @@ Check(OledConverter.Convert(new byte[] { 0, 0, 0, 0 }, 1, 1).ToPageBytes().All(b
     "Transparent pixels composited over white");
 try { OledConverter.Convert(blackRgba, 0, 1); throw new Exception("Missing dimension validation"); }
 catch (ArgumentOutOfRangeException) { Console.WriteLine("PASS: Invalid dimensions rejected"); }
+var smallProfile = DisplayProfiles.Ssd1306_128x32;
+var small = MonochromeConverter.Convert(blackRgba, 1, 1, smallProfile);
+Check(small.ToPageBytes().Length == 512 && small.ToPageBytes().All(b => b == 0xFF),
+    "128x32 profile packs four pages");
+Check(small.ToBmp().Length == 54 + 128 * 32 * 3, "Profile controls BMP dimensions");
+Check(small.ToCArray().Contains("[512]"), "C array follows selected profile");
+Check(MonochromeConverter.Convert(whiteRgba, 1, 1, smallProfile).ToPageBytes().All(b => b == 0),
+    "Dynamic conversion preserves legacy threshold polarity");
+var sim = new ScreenSimulator(smallProfile);
+sim.LoadFrame(small);
+Check(sim.PixelIsLit(0, 0) && sim.PixelIsLit(127, 31), "Simulator reads page framebuffer");
+sim.WritePage(0, 0, new byte[] { 0 });
+Check(!sim.PixelIsLit(0, 0) && sim.PixelIsLit(1, 0), "Simulator accepts page writes");
+sim.IsInverted = true;
+Check(sim.PixelIsLit(0, 0) && !sim.PixelIsLit(1, 0), "Display inversion affects visible pixels");
+sim.IsPoweredOn = false;
+Check(!sim.PixelIsLit(0, 0), "Display power-off blanks visible pixels");
+sim.IsPoweredOn = true;
+Check(sim.PixelIsLit(0, 0), "Power cycling preserves video RAM");
+Check(sim.ReadPageBytes().Length == 512, "Simulator exposes page-ordered framebuffer");
+try { sim.LoadPageBytes(new byte[1024]); throw new Exception("Missing profile byte count check"); }
+catch (ArgumentException) { Console.WriteLine("PASS: Invalid framebuffer length rejected"); }
+try { sim.WritePage(0, 127, new byte[2]); throw new Exception("Missing page bounds check"); }
+catch (ArgumentException) { Console.WriteLine("PASS: Out-of-bounds page write rejected"); }
 Console.WriteLine("All core tests passed.");

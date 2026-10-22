@@ -11,33 +11,10 @@ public static class OledConverter
     public static OledFrame Convert(ReadOnlySpan<byte> rgba, int sourceWidth, int sourceHeight,
         int threshold = 300, bool invert = false)
     {
-        if (sourceWidth <= 0 || sourceHeight <= 0)
-            throw new ArgumentOutOfRangeException(nameof(sourceWidth), "Dimensions must be positive.");
-        if (threshold is < 0 or > 765)
-            throw new ArgumentOutOfRangeException(nameof(threshold));
-        long required = (long)sourceWidth * sourceHeight * 4;
-        if (required > rgba.Length)
-            throw new ArgumentException("RGBA buffer is smaller than the image dimensions.", nameof(rgba));
-
-        byte[] pixels = new byte[Width * Height];
-        for (int y = 0; y < Height; y++)
-        {
-            int sourceY = Math.Min(sourceHeight - 1, (int)((y + 0.5) * sourceHeight / Height));
-            for (int x = 0; x < Width; x++)
-            {
-                int sourceX = Math.Min(sourceWidth - 1, (int)((x + 0.5) * sourceWidth / Width));
-                int index = (sourceY * sourceWidth + sourceX) * 4;
-                int alpha = rgba[index + 3];
-                // Transparent pixels are composited onto white rather than interpreted as black.
-                int brightness = 0;
-                for (int color = 0; color < 3; color++)
-                    brightness += (rgba[index + color] * alpha + 255 * (255 - alpha)) / 255;
-                // Preserve the legacy converter's threshold polarity.
-                bool isWhite = (brightness <= threshold) != invert;
-                pixels[y * Width + x] = isWhite ? (byte)1 : (byte)0;
-            }
-        }
-        return new OledFrame(pixels);
+        // Keep the original 128x64 API and byte layout stable for existing integrations.
+        var frame = MonochromeConverter.Convert(rgba, sourceWidth, sourceHeight,
+            DisplayProfiles.Ssd1306_128x64, threshold, invert);
+        return new OledFrame(frame.ToPixelBytes());
     }
 }
 
