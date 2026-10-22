@@ -8,6 +8,10 @@
 
 PictureFetcher 是面向嵌入式开发的跨平台**图形资源工作室**，提供图像取模、控制器数据导出与 OLED 虚拟屏幕，使用 .NET 10 + Avalonia，界面采用简洁的 Mac 风格。
 
+## 安装包瘦身
+
+通过 .NET **部分 IL 裁剪（TrimMode=partial）**，在仍然自包含、用户无需安装 .NET 运行时的前提下，四平台匹配构建的压缩输出减少约 **61%～66%**。保留中英文资源及 Avalonia 动态 UI；Linux 版已进行真实窗口启动与 SSD1306/SH1106、数据导出等功能冒烟测试。Windows ZIP、macOS DMG 最终体积与对照测试的 tar.gz 会有所不同，详见[测试与打包说明](docs/PACKAGING.md)。
+
 ## v2.1.0 正式版本
 
 本次整合 OLED 模拟屏幕、SSD1306 命令流模拟、SH1106 的 132 列显存与 Controller TX 预览。Windows 和 Linux 将自动生成公开安装包；macOS DMG 只有完成 Developer ID 签名与苹果公证后才纳入公开 Release，否则仅保留为 CI 构建产物，避免“应用已损坏”提示误导用户。

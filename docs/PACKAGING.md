@@ -15,7 +15,9 @@ CI runs publish and packaging smoke checks for each RID. The pre-archive publish
 - `IncludeNativeLibrariesForSelfExtract=true` bundles the native graphics libraries with the executable.
 - `PublishReadyToRun=false` avoids duplicate native precompiled method bodies.
 - `DebugType=None`, `DebugSymbols=false` remove PDB payloads.
-- `PublishTrimmed=false`: intentionally conservative. Enable IL trimming **only after GUI smoke tests on all four platforms** and a tested linker configuration. CI build success alone is not proof that trimmed UI resources work.
+- `PublishTrimmed=true` with `TrimMode=partial` is now the production profile for the self-contained desktop executables. Only assemblies marked safe for trimming are reduced; reflective Avalonia components remain intact. This was selected after cross-platform archive-size comparisons and a real Linux/Xvfb Avalonia UI test that opens the window, switches SSD1306/SH1106, exercises HEX/C/Controller-TX outputs, screen power/inversion, and English/Chinese resources.
+- `PublishTrimmed=false` is still available through `packaging/publish.sh <RID> <output> baseline` for regression diagnosis. A separate `partial-trim` profile carries the tested optimization. Avoid switching to full trimming or NativeAOT without equivalent end-to-end tests.
+- All CI and Release jobs use the **same** `packaging/publish.sh` invocation so their self-contained packaging settings cannot drift.
 - No AppImage/Electron/secondary runtime or universal fat macOS app is built: each archive contains **one architecture** only.
 
 ## Mac distribution (critical)
@@ -62,3 +64,16 @@ A Linux desktop session and system graphics/font libraries are required. Self-co
 ### Release recovery
 
 If a release fails *before the version tag is created* (for example, a workflow bug), update the `RELEASE_TRIGGER` file on `master` with a new retry reference. This starts another packaging and release attempt for the same `VERSION` without changing the application version. The release job rejects an existing tag pointing at any other commit rather than rewriting released source history. Before retrying, check that the release tag does not already exist. The official release still requires all platform packaging jobs to pass.
+
+## Size optimization benchmark (2026-10-22)
+
+Measured compressed `tar.gz` payloads of the **same published output directory** (reference vs `TrimMode=partial`) using the four native GitHub Actions runners. These are transfer-size experiments, **not** the actual Windows ZIP or macOS DMG asset sizes:
+
+| RID | Reference (MB, decimal) | Partial trim (MB, decimal) | Reduction |
+|---|---:|---:|---:|
+| win-x64 | 41.69 | 15.01 | 63.98% |
+| linux-x64 | 39.81 | 13.53 | 66.02% |
+| osx-arm64 | 41.18 | 16.09 | 60.94% |
+| osx-x64 | 43.16 | 16.59 | 61.55% |
+
+CI comparison: `Package size experiment` workflow. The Linux trimmed binary also passed a real Avalonia window/graphics/C-array/HEX/controller-byte/UI-localization smoke test under Xvfb. CI does not fully automate mouse interaction on macOS or Windows. No behavior change to globalization (zh-CN remains supported), no dependency on a separately installed .NET runtime, and no weakening of macOS notarization gating.

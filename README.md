@@ -4,7 +4,11 @@
 
 A cross-platform **embedded graphics studio** for preparing monochrome display assets and testing them in a virtual OLED screen. Powered by .NET 10 and Avalonia.
 
-## Latest release — v2.1.0
+## Package size optimization
+
+The desktop application uses conservative **partial .NET IL trimming** while preserving self-contained single-file executables. On matched GitHub Actions builds, compressed output shrank by **61–66%** across Windows x64, Linux x64, and both macOS architectures versus untrimmed outputs. Windows ZIP and macOS DMG distribution sizes may differ from the tar.gz measurement baseline; see [packaging measurements](docs/PACKAGING.md). Chinese localization, the controller simulators, and the Linux Avalonia GUI startup were tested after trimming.
+
+## Latest release — v2.0/2.1 feature series
 
 This release introduces the SSD1306 command-stream simulator, SH1106 132-column RAM model, controller-specific TX view, and the on-device OLED preview added in v2.0.0. Windows x64 and Linux x64 distribution archives are produced automatically; macOS DMGs are published **only after Developer ID notarization** (otherwise they remain downloadable as temporary CI workflow artifacts, not public release assets).
 

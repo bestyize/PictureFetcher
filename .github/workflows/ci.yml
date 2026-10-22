@@ -52,15 +52,7 @@ jobs:
       - name: Publish self-contained single-file desktop app
         shell: bash
         run: |
-          dotnet publish PictureFetcher.csproj \
-            -c Release -r ${{ matrix.rid }} --self-contained true \
-            -p:PublishSingleFile=true \
-            -p:IncludeNativeLibrariesForSelfExtract=true \
-            -p:EnableCompressionInSingleFile=true \
-            -p:PublishReadyToRun=false \
-            -p:PublishTrimmed=false \
-            -p:DebugType=None -p:DebugSymbols=false \
-            -o publish/${{ matrix.rid }}
+          bash packaging/publish.sh "${{ matrix.rid }}" "publish/${{ matrix.rid }}" partial-trim
       - name: Check bundle payload
         shell: bash
         run: |
@@ -101,6 +93,12 @@ jobs:
             echo "GUI did not stay running (exit $result)"
             exit 1
           fi
+      - name: Verify trimmed OLED controls, controller exports and bilingual resources
+        if: matrix.rid == 'linux-x64'
+        shell: bash
+        run: |
+          timeout 20s xvfb-run -a env PICTUREFETCHER_UI_SMOKE=1 \
+            ./publish/linux-x64/PictureFetcher
       - name: Record uncompressed payload size
         shell: bash
         run: |

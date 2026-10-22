@@ -53,15 +53,7 @@ jobs:
       - name: Publish self-contained single-file binary
         shell: bash
         run: |
-          dotnet publish PictureFetcher.csproj \
-            -c Release -r ${{ matrix.rid }} --self-contained true \
-            -p:PublishSingleFile=true \
-            -p:IncludeNativeLibrariesForSelfExtract=true \
-            -p:EnableCompressionInSingleFile=true \
-            -p:PublishReadyToRun=false \
-            -p:PublishTrimmed=false \
-            -p:DebugType=None -p:DebugSymbols=false \
-            -o publish/${{ matrix.rid }}
+          bash packaging/publish.sh "${{ matrix.rid }}" "publish/${{ matrix.rid }}" partial-trim
 
       - name: Pack Windows x64 ZIP
         if: matrix.rid == 'win-x64'
