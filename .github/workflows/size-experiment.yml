@@ -1,0 +1,63 @@
+name: Package size experiment
+on:
+  push:
+    branches: ['feature/package-size-optimization']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compare:
+    name: Compare self-contained sizes
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { rid: linux-x64, os: ubuntu-latest, executable: PictureFetcher }
+          - { rid: win-x64, os: windows-latest, executable: PictureFetcher.exe }
+          - { rid: osx-arm64, os: macos-15, executable: PictureFetcher }
+          - { rid: osx-x64, os: macos-15, executable: PictureFetcher }
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with: { dotnet-version: '10.0.x' }
+      - name: Build baseline
+        shell: bash
+        run: bash packaging/publish.sh "${{ matrix.rid }}" artifacts/baseline baseline
+      - name: Build partial trim
+        shell: bash
+        run: bash packaging/publish.sh "${{ matrix.rid }}" artifacts/partial-trim partial-trim
+      - name: Measure compressed payloads
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s "artifacts/baseline/${{ matrix.executable }}"
+          test -s "artifacts/partial-trim/${{ matrix.executable }}"
+          tar -czf "pf-reference.tar.gz" -C artifacts/baseline .
+          tar -czf "pf-candidate.tar.gz" -C artifacts/partial-trim .
+          reference="$(wc -c < "pf-reference.tar.gz" | tr -d '[:space:]')"
+          candidate="$(wc -c < "pf-candidate.tar.gz" | tr -d '[:space:]')"
+          echo "SIZE_REFERENCE_BYTES=$reference"
+          echo "SIZE_CANDIDATE_BYTES=$candidate"
+          echo "SIZE_SAVED_BYTES=$((reference - candidate))"
+          echo "SIZE_SAVED_PERCENT=$(awk -v a="$reference" -v b="$candidate" 'BEGIN { printf "%.2f", 100*(a-b)/a }')"
+          {
+            echo "### ${{ matrix.rid }} compressed payload"
+            echo "| Profile | Bytes |"
+            echo "|---|---:|"
+            echo "| Baseline | $reference |"
+            echo "| Partial trim | $candidate |"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Check trimmed Linux UI startup
+        if: matrix.rid == 'linux-x64'
+        shell: bash
+        run: |
+          if ! command -v xvfb-run >/dev/null 2>&1; then
+            sudo apt-get update -qq && sudo apt-get install -y xvfb
+          fi
+          set +e
+          timeout 20s xvfb-run -a env PICTUREFETCHER_UI_SMOKE=1 artifacts/partial-trim/PictureFetcher > /tmp/trimmed-gui.log 2>&1
+          result=$?
+          set -e
+          cat /tmp/trimmed-gui.log
+          test "$result" -eq 0

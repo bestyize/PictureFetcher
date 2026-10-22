@@ -52,15 +52,7 @@ jobs:
       - name: Publish self-contained single-file desktop app
         shell: bash
         run: |
-          dotnet publish PictureFetcher.csproj \
-            -c Release -r ${{ matrix.rid }} --self-contained true \
-            -p:PublishSingleFile=true \
-            -p:IncludeNativeLibrariesForSelfExtract=true \
-            -p:EnableCompressionInSingleFile=true \
-            -p:PublishReadyToRun=false \
-            -p:PublishTrimmed=false \
-            -p:DebugType=None -p:DebugSymbols=false \
-            -o publish/${{ matrix.rid }}
+          bash packaging/publish.sh "${{ matrix.rid }}" "publish/${{ matrix.rid }}" partial-trim
       - name: Check bundle payload
         shell: bash
         run: |
@@ -84,23 +76,23 @@ jobs:
         run: |
           ls -lh release-assets/
           test -n "$(find release-assets -type f -size +1M -print -quit)"
-      - name: Launch Linux GUI under virtual display
+      - name: Verify trimmed OLED controls, controller exports and bilingual resources
         if: matrix.rid == 'linux-x64'
         shell: bash
         run: |
+          set -euo pipefail
           if ! command -v xvfb-run >/dev/null 2>&1; then
             sudo apt-get update -qq
             sudo apt-get install -y xvfb
           fi
           set +e
-          timeout 12s xvfb-run -a ./publish/linux-x64/PictureFetcher > /tmp/picturefetcher-gui.log 2>&1
+          timeout 35s xvfb-run -a env PICTUREFETCHER_UI_SMOKE=1 \
+            ./publish/linux-x64/PictureFetcher > /tmp/picturefetcher-smoke.log 2>&1
           result=$?
           set -e
-          cat /tmp/picturefetcher-gui.log
-          if [ "$result" -ne 124 ]; then
-            echo "GUI did not stay running (exit $result)"
-            exit 1
-          fi
+          cat /tmp/picturefetcher-smoke.log
+          echo "UI smoke exit code: $result"
+          test "$result" -eq 0
       - name: Record uncompressed payload size
         shell: bash
         run: |
