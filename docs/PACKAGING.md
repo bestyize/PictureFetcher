@@ -58,3 +58,7 @@ A Linux desktop session and system graphics/font libraries are required. Self-co
 - macOS builds always produce CI DMGs for validation. A DMG only enters public GitHub Releases if the package script generated a `.dmg.notarized` marker **after** Apple stapler validation. Without Developer ID signing and notarization secrets, public releases intentionally omit both macOS DMGs.
 - If either version file and project version disagree, or if an existing release tag points to a different commit, the release job fails rather than silently reusing or moving the tag.
 - Only packaged distributables have SHA-256 hashes in `SHA256SUMS.txt`; CI-only macOS builds are excluded from that public list.
+
+### Release recovery
+
+If a release fails *before the version tag is created* (for example, a workflow bug), update the `RELEASE_TRIGGER` file on `master` with a new retry reference. This starts another packaging and release attempt for the same `VERSION` without changing the application version. The release job rejects an existing tag pointing at any other commit rather than rewriting released source history. Before retrying, check that the release tag does not already exist. The official release still requires all platform packaging jobs to pass.
