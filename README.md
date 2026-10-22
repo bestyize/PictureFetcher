@@ -24,15 +24,15 @@ The binaries are self-contained, so you do **not** need to install the .NET 10 r
 - Native-feeling macOS-inspired desktop layout on Windows, Linux and macOS.
 - English / 简体中文 UI, with remembered language preference.
 - Open or drag an image into the editor; preview the original and the converted bitmap.
-- Choose SSD1306 128 × 64 or 128 × 32; output sizes and page-buffer lengths follow the profile.
+- Choose SSD1306 128 × 64 / 128 × 32, or SH1106 128 × 64 with a 132-column hardware RAM window and a configurable 2-column default glass offset in the core.
 - Simulate a virtual OLED display with a pixel-grid bezel, cyan/amber/white illumination, power and hardware-style display inversion.
 - Adjustable threshold and invert control.
-- SSD1306 page-format output: hexadecimal byte stream or a 1024-byte / 512-byte C array, with copy action.
+- Export HEX and C arrays as before, or switch to **Controller TX** to inspect command/data bytes for SSD1306 horizontal mode or SH1106 page writes (1024/512 visible image bytes).
 - Save individual BMP images or batch-convert multiple images.
 
-**Simulator scope:** The current simulator models page-ordered video RAM, individual page writes, display on/off and inversion. It does **not** yet decode SSD1306 commands, emulate I2C/SPI electrical behavior, or simulate full-color displays. See [Embedded studio architecture](docs/EMBEDDED_STUDIO.md) for the phased roadmap.
+**Simulator scope:** The command interpreters now support SSD1306 page/horizontal/vertical RAM addressing, address windows, display power/inversion/remap and selected scan settings; SH1106 supports its own 132-column, page-only addressing, visible window and page-transfer sequences. Unimplemented commands fail explicitly; analog settings are accepted without rendering a physical effect. This is a **command/data byte-stream simulator, not an I2C/SPI electrical or firmware/MCU emulator**, and does not model continuous scrolling or full-color displays. See [Embedded studio architecture](docs/EMBEDDED_STUDIO.md) for the phased roadmap.
 
-**Conversion compatibility:** The original app's threshold polarity is preserved: a pixel with R+G+B above the threshold is rendered black (unless Invert is enabled). This can differ from other image tools. The OLED byte encoding is vertical LSB-first, in eight pages of 128 bytes.
+**Conversion compatibility:** The original app's threshold polarity is preserved: a pixel with R+G+B above the threshold is rendered black (unless Invert is enabled). This can differ from other image tools. The monochrome byte encoding is vertical LSB-first, with 128 bytes per visible page (8 pages at 128×64, 4 at 128×32).
 
 **Safe batch exports:** Converted files are saved beside their sources with the suffix `-oled.bmp`. If the name exists, numbered suffixes are used instead of overwriting any source or previous export.
 

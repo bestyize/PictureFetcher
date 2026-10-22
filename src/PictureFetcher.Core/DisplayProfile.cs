@@ -29,6 +29,8 @@ public static class DisplayProfiles
     public static readonly DisplayProfile Ssd1306_128x64 = new("ssd1306-128x64", "SSD1306 · 128 × 64", 128, 64);
     public static readonly DisplayProfile Ssd1306_128x32 = new("ssd1306-128x32", "SSD1306 · 128 × 32", 128, 32);
 
+    public static readonly DisplayProfile Sh1106_128x64 = new("sh1106-128x64", "SH1106 · 128 × 64", 128, 64);
+
     public static IReadOnlyList<DisplayProfile> BuiltIn { get; } =
-        Array.AsReadOnly(new[] { Ssd1306_128x64, Ssd1306_128x32 });
+        Array.AsReadOnly(new[] { Ssd1306_128x64, Ssd1306_128x32, Sh1106_128x64 });
 }
