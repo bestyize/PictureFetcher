@@ -4,6 +4,10 @@
 
 A cross-platform **embedded graphics studio** for preparing monochrome display assets and testing them in a virtual OLED screen. Powered by .NET 10 and Avalonia.
 
+## Latest release — v2.1.0
+
+This release introduces the SSD1306 command-stream simulator, SH1106 132-column RAM model, controller-specific TX view, and the on-device OLED preview added in v2.0.0. Windows x64 and Linux x64 distribution archives are produced automatically; macOS DMGs are published **only after Developer ID notarization** (otherwise they remain downloadable as temporary CI workflow artifacts, not public release assets).
+
 ## Downloads
 
 Get your platform's archive from [GitHub Releases](https://github.com/bestyize/PictureFetcher/releases).
@@ -60,7 +64,7 @@ Replace `linux-x64` with `win-x64`, `osx-arm64`, or `osx-x64` as needed. For dis
 
 ## Release automation
 
-CI validates the portable conversion core and generates all four self-contained runtime targets; it also smoke-tests the platform-specific package formats. Push a version tag `vX.Y.Z` after merging to publish the four archives and `SHA256SUMS.txt` to GitHub Releases. You can invoke the release workflow manually to generate reviewable artifacts without publishing a public release.
+CI validates the portable conversion core and generates all four self-contained runtime targets; it also smoke-tests the platform-specific package formats. Update the project `<Version>` and the top-level `VERSION` file together. After those changes are merged into `master`, GitHub Actions automatically creates the version tag and publishes Windows/Linux archives, checksums, and any notarized macOS DMGs to GitHub Releases. Pushing a `vX.Y.Z` tag manually is also supported. You can invoke the release workflow manually to generate reviewable artifacts without publishing a public release.
 
 Optimizations are deliberately conservative: single-file bundling with compression, no PDB files or ReadyToRun payload, and no duplicated multi-RID runtime archives. IL trimming is **not** enabled because Avalonia's XAML and reflection-based code need runtime verification before aggressive trimming; smaller file size must not come at the cost of a broken app.
 
