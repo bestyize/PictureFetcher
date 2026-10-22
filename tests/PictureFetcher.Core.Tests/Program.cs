@@ -118,7 +118,7 @@ Check(sh1106.ReadGddram()[0] == 0 && sh1106.ReadGddram()[2] == 0x01,
 sh1106.WriteCommands(new byte[] { 0xB1, 0x02, 0x10 });
 sh1106.WriteData(new byte[] { 0x02 });
 Check(sh1106.ReadVisiblePageBytes()[128] == 0x02, "SH1106 page selection is explicit");
-sh1106.WriteCommands(new byte[] { 0xB0, 0x0F, 0x18 });
+sh1106.WriteCommands(new byte[] { 0xB0, 0x18, 0x03 });
 sh1106.WriteData(new byte[] { 0x55, 0x66 });
 Check(sh1106.ReadGddram()[131] == 0x55 && sh1106.ReadGddram()[0] == 0x66 &&
       sh1106.CurrentPage == 0, "SH1106 wraps after 132 columns without advancing pages");

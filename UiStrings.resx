@@ -44,4 +44,8 @@
   <data name="TintAmber" xml:space="preserve"><value>Amber</value></data>
   <data name="TintWhite" xml:space="preserve"><value>White</value></data>
   <data name="ArrayProfileDescription" xml:space="preserve"><value>{0} bytes · SSD1306 page order</value></data>
+  <data name="ControllerTx" xml:space="preserve"><value>Controller TX</value></data>
+  <data name="Sh1106ArrayDescription" xml:space="preserve"><value>{0} bytes · SH1106 visible data (+2 columns)</value></data>
+  <data name="Sh1106ProtocolHint" xml:space="preserve"><value>SH1106 · 132-column RAM · page writes at column +2</value></data>
+  <data name="Ssd1306ProtocolHint" xml:space="preserve"><value>SSD1306 · horizontal GDDRAM addressing</value></data>
 </root>

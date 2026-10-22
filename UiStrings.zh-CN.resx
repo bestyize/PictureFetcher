@@ -44,4 +44,8 @@
   <data name="TintAmber" xml:space="preserve"><value>琥珀</value></data>
   <data name="TintWhite" xml:space="preserve"><value>白色</value></data>
   <data name="ArrayProfileDescription" xml:space="preserve"><value>{0} 字节 · SSD1306 页序</value></data>
+  <data name="ControllerTx" xml:space="preserve"><value>控制器数据流</value></data>
+  <data name="Sh1106ArrayDescription" xml:space="preserve"><value>{0} 字节 · SH1106 可见区数据（+2 列）</value></data>
+  <data name="Sh1106ProtocolHint" xml:space="preserve"><value>SH1106 · 132 列显存 · 从第 2 列开始分页写入</value></data>
+  <data name="Ssd1306ProtocolHint" xml:space="preserve"><value>SSD1306 · 水平显存寻址模式</value></data>
 </root>

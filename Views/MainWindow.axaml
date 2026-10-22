@@ -57,7 +57,7 @@
           </Grid>
         </Border>
         <Border x:Name="OutputCard" Classes="surface" Grid.Column="1" Padding="18">
-          <Grid RowDefinitions="Auto,Auto,*,Auto,Auto" RowSpacing="10">
+          <Grid RowDefinitions="Auto,Auto,*,Auto,Auto,Auto" RowSpacing="10">
             <TextBlock x:Name="ConvertedHeading" Classes="eyebrow" Text="DEVICE SIMULATOR"/>
             <Grid Grid.Row="1" ColumnDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="8">
               <TextBlock x:Name="ProfileLabel" Text="Screen" FontSize="11" Foreground="#64748B" VerticalAlignment="Center"/>
@@ -65,6 +65,7 @@
                         SelectionChanged="OnDisplayProfileChanged">
                 <ComboBoxItem Content="SSD1306 · 128×64"/>
                 <ComboBoxItem Content="SSD1306 · 128×32"/>
+                <ComboBoxItem Content="SH1106 · 128×64"/>
               </ComboBox>
               <TextBlock x:Name="TintLabel" Grid.Column="2" Text="Color" FontSize="11" Foreground="#64748B" VerticalAlignment="Center"/>
               <ComboBox x:Name="PixelTintPicker" Grid.Column="3" Width="83" SelectedIndex="0"
@@ -91,6 +92,7 @@
                        RenderOptions.BitmapInterpolationMode="None"/>
               </Border>
             </Grid>
+            <TextBlock x:Name="ControllerCommandHint" Grid.Row="5" FontSize="10" Foreground="#7B8799" TextWrapping="Wrap"/>
           </Grid>
         </Border>
       </Grid>
@@ -105,9 +107,10 @@
             <Slider x:Name="ThresholdSlider" Grid.Column="1" Minimum="0" Maximum="765" Value="300" TickFrequency="15" ValueChanged="OnThresholdChanged"/>
             <TextBlock x:Name="ThresholdValue" Grid.Column="2" Text="300" Width="32" VerticalAlignment="Center"/>
             <CheckBox x:Name="InvertBox" Grid.Column="3" Content="Invert" IsChecked="False" Checked="OnSettingsChanged" Unchecked="OnSettingsChanged"/>
-            <ComboBox x:Name="FormatPicker" Grid.Column="4" SelectedIndex="0" SelectionChanged="OnSettingsChanged" Width="95">
+            <ComboBox x:Name="FormatPicker" Grid.Column="4" SelectedIndex="0" SelectionChanged="OnSettingsChanged" Width="124">
               <ComboBoxItem Content="HEX"/>
               <ComboBoxItem Content="C array"/>
+              <ComboBoxItem x:Name="ControllerTxOption" Content="Controller TX"/>
             </ComboBox>
           </Grid>
           <TextBox x:Name="OutputText" Grid.Row="2" Height="165" Background="#F6F8FC" BorderBrush="#E6EAF2" BorderThickness="1" CornerRadius="10" Padding="12" AcceptsReturn="True" IsReadOnly="True"

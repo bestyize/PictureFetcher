@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
@@ -51,9 +52,12 @@ public partial class MainWindow : Window
         Rebuild();
     }
 
-    private DisplayProfile SelectedDisplayProfile =>
-        DisplayProfilePicker?.SelectedIndex == 1
-            ? DisplayProfiles.Ssd1306_128x32 : DisplayProfiles.Ssd1306_128x64;
+    private DisplayProfile SelectedDisplayProfile => DisplayProfilePicker?.SelectedIndex switch
+    {
+        1 => DisplayProfiles.Ssd1306_128x32,
+        2 => DisplayProfiles.Sh1106_128x64,
+        _ => DisplayProfiles.Ssd1306_128x64
+    };
 
     private void AdaptLayout()
     {
@@ -96,6 +100,7 @@ public partial class MainWindow : Window
         CyanOption.Content = UiStrings.Get("TintCyan");
         AmberOption.Content = UiStrings.Get("TintAmber");
         WhiteOption.Content = UiStrings.Get("TintWhite");
+        ControllerTxOption.Content = UiStrings.Get("ControllerTx");
     }
 
     private void OnDragOver(object? sender, DragEventArgs e)
@@ -200,9 +205,13 @@ public partial class MainWindow : Window
             DisplayProfilePicker is null || ProfileBadge is null) return;
         var profile = SelectedDisplayProfile;
         ThresholdValue.Text = ((int)ThresholdSlider.Value).ToString();
-        ProfileBadge.Text = $"{profile.Width} × {profile.Height}";
+        ProfileBadge.Text = profile.Name;
         SimulationStatus.Text = $"{profile.BufferSize} B";
-        DataHint.Text = string.Format(UiStrings.Get("ArrayProfileDescription"), profile.BufferSize);
+        bool isSh1106 = profile.Id.StartsWith("sh1106-", StringComparison.Ordinal);
+        DataHint.Text = string.Format(
+            UiStrings.Get(isSh1106 ? "Sh1106ArrayDescription" : "ArrayProfileDescription"),
+            profile.BufferSize);
+        ControllerCommandHint.Text = UiStrings.Get(isSh1106 ? "Sh1106ProtocolHint" : "Ssd1306ProtocolHint");
         _simulator = new ScreenSimulator(profile);
         if (_rgba is null)
         {
@@ -212,15 +221,65 @@ public partial class MainWindow : Window
 
         _frame = MonochromeConverter.Convert(_rgba, _sourceWidth, _sourceHeight,
             profile, (int)ThresholdSlider.Value, InvertBox.IsChecked == true);
-        _simulator.LoadFrame(_frame);
+        // Route display preview through the same command/data paths that firmware uses.
+        if (isSh1106)
+        {
+            var device = new Sh1106CommandSimulator(profile);
+            device.LoadVisibleFrame(_frame);
+            device.WriteCommand(0xAF);
+            _simulator = device.SnapshotDisplay();
+        }
+        else
+        {
+            var device = new Ssd1306CommandSimulator(profile);
+            device.WriteCommands(new byte[] {
+                0x20, 0x00, 0x21, 0x00, (byte)(profile.Width - 1),
+                0x22, 0x00, (byte)(profile.PageCount - 1)
+            });
+            device.WriteData(_frame.ToPageBytes());
+            device.WriteCommand(0xAF);
+            _simulator = device.SnapshotDisplay();
+        }
         using var imageStream = new MemoryStream(_frame.ToBmp());
         var next = new Bitmap(imageStream);
         ResultPreview.Source = next;
         _resultBitmap?.Dispose();
         _resultBitmap = next;
-        OutputText.Text = FormatPicker.SelectedIndex == 1 ? _frame.ToCArray() : _frame.ToHexText();
+        OutputText.Text = FormatPicker.SelectedIndex switch
+        {
+            1 => _frame.ToCArray(),
+            2 => FormatControllerTransfers(_frame),
+            _ => _frame.ToHexText()
+        };
         RefreshSimulation();
     }
+
+    private static string FormatControllerTransfers(MonochromeFrame frame)
+    {
+        var sb = new StringBuilder();
+        if (frame.Profile.Id.StartsWith("sh1106-", StringComparison.Ordinal))
+        {
+            foreach (var transfer in Sh1106PageTransferEncoder.Encode(frame))
+            {
+                sb.Append("CMD: ").AppendLine(ToSpacedHex(transfer.Commands));
+                sb.Append("DATA: ").AppendLine(ToSpacedHex(transfer.Data));
+            }
+        }
+        else
+        {
+            byte[] setup = {
+                0x20, 0x00, 0x21, 0x00, (byte)(frame.Profile.Width - 1),
+                0x22, 0x00, (byte)(frame.Profile.PageCount - 1)
+            };
+            sb.Append("CMD: ").AppendLine(ToSpacedHex(setup));
+            sb.Append("DATA: ").AppendLine(ToSpacedHex(frame.ToPageBytes()));
+        }
+        sb.AppendLine("CMD: AF");
+        return sb.ToString();
+    }
+
+    private static string ToSpacedHex(byte[] data) =>
+        string.Join(" ", data.Select(value => value.ToString("X2")));
 
     private async void OnSaveClicked(object? sender, RoutedEventArgs e)
     {
