@@ -77,5 +77,8 @@ if [[ -n "${APPLE_NOTARY_ID:-}" ]]; then
     --team-id "$APPLE_NOTARY_TEAM_ID" --wait
   xcrun stapler staple "release-assets/PictureFetcher-$label-$rid.dmg"
   xcrun stapler validate "release-assets/PictureFetcher-$label-$rid.dmg"
+  # Marker is uploaded with CI artifacts only after Apple notarization is verified.
+  # The release workflow excludes all macOS DMGs without this proof.
+  printf 'notarized\n' > "release-assets/PictureFetcher-$label-$rid.dmg.notarized"
 fi
 

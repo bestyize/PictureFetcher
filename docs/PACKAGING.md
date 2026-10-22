@@ -49,3 +49,12 @@ With a certificate, macOS package jobs import the signing identity into a tempor
 ## Linux dependencies
 
 A Linux desktop session and system graphics/font libraries are required. Self-contained .NET removes the need for a separate .NET runtime, not platform libraries such as X11, fontconfig, or glibc. The tarball can be installed into a user-writable directory without root privileges.
+
+## Automated, verifiable release pipeline
+
+- A release branch changes the project's `<Version>` and the single-line `VERSION` file together.
+- When `VERSION` changes on `master`, `release.yml` packages all supported RID targets, confirms that all package jobs have passed, creates `vX.Y.Z` on that exact commit, and publishes ZIP/tar.gz and SHA-256 checksums. This avoids a separate manual tag action.
+- Existing `vX.Y.Z` tag pushes are still supported. Manually dispatched workflow runs package review artifacts, but do not publish a release.
+- macOS builds always produce CI DMGs for validation. A DMG only enters public GitHub Releases if the package script generated a `.dmg.notarized` marker **after** Apple stapler validation. Without Developer ID signing and notarization secrets, public releases intentionally omit both macOS DMGs.
+- If either version file and project version disagree, or if an existing release tag points to a different commit, the release job fails rather than silently reusing or moving the tag.
+- Only packaged distributables have SHA-256 hashes in `SHA256SUMS.txt`; CI-only macOS builds are excluded from that public list.
